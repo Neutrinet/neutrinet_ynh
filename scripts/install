@@ -7,6 +7,10 @@ install_renew_cert() {
 
     install_dir=$(pwd)
 
+    if [ -e $RENEW_CERT_PATH ]; then
+        rm -rf $RENEW_CERT_PATH
+    fi
+
     sudo apt-get install -y python-virtualenv
 
     sudo git clone https://github.com/neutrinet/renew_cert $RENEW_CERT_PATH
