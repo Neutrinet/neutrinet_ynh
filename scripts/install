@@ -44,6 +44,6 @@ sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
 install_renew_cert
 
 # vpn is not running, let's assume for now that this mean that the vpn is broken
-if [ ! "$((ip -4 addr show tun0 | grep 'inet 80.67.181.') || echo '')" ]; then
+if [ ! "$(grep '^port 1194' /etc/openvpn/client.conf)" ]; then
     renew_cert
 fi
