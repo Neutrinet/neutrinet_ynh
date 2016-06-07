@@ -1,0 +1,16 @@
+{
+    "name": "Neutrinet",
+    "id": "neutrinet",
+    "description": {
+        "en": "Specific configs for Neutrinet",
+        "fr": "Configuration spécific pour Neutrinet"
+    },
+    "license": "GPL-3+",
+    "maintainer": {
+        "name": "bram",
+        "email": "cortex@worlddomination.be",
+        "url": "http://worlddomination.be"
+    },
+    "multi_instance": "false",
+    "arguments": {}
+}

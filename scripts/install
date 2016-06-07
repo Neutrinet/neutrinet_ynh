@@ -1,0 +1,37 @@
+set -e
+
+install_renew_cert() {
+    set -e
+
+    sudo apt-get install -y python-virtualenv
+
+    sudo git clone https://github.com/neutrinet/renew_cert /opt
+
+    git checkout a6d09c2d77ce9bd4161d56e93fc5ce03187ad51c || echo ""
+
+    install_dir=$(pwd)
+
+    cd /opt/renew_cert
+
+    # I need system site packages otherwise moulinette is broken
+    sudo virtualenv ve --system-site-packages
+    sudo ve/bin/pip install -r requirements.txt
+
+    cd $install_dir
+}
+
+renew_cert() {
+    cd /opt/renew_cert
+    sudo ve/bin/python renew_from_cube.py
+}
+
+path=${path%/}
+
+sudo yunohost app setting neutrinet version -v "0.1"
+
+install_renew_cert
+
+# vpn is not running, let's assume for now that this mean that the vpn is broken
+if [ ! "$((ip -4 addr show tun0 | grep 'inet 80.67.181.') || echo '')" ]; then
+    renew_cert
+fi
