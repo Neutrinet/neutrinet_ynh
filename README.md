@@ -6,6 +6,7 @@ For now it does 2 things:
 
 * fixed the situation where your certificate is outdated
 * install neutrinet app list for YunoHost so you get updates for this app
+* install labrique internet/internet cube app list for YunoHost so you get updates for this app
 
 # Installation
 
