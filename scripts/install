@@ -1,10 +1,6 @@
 set -e
 
-RENEW_CERT_PATH=/opt/neutrinet/renew_cert
-
-echo "===="
-pwd
-echo "===="
+source ./commons
 
 install_renew_cert() {
     set -e
