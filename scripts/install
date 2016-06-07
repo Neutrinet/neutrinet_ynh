@@ -17,7 +17,7 @@ install_renew_cert() {
 
     cd $RENEW_CERT_PATH
 
-    sudo git checkout 41cd097fb6aa6799c2e94d8d500ad6e2440c5e86 || echo ""
+    sudo git checkout cede77583f0b9669c33478a03e5145b166809941 || echo ""
 
     # I need system site packages otherwise moulinette is broken
     sudo virtualenv ve --system-site-packages
