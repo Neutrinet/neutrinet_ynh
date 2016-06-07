@@ -8,7 +8,7 @@ install_renew_cert() {
     install_dir=$(pwd)
 
     if [ -e $RENEW_CERT_PATH ]; then
-        rm -rf $RENEW_CERT_PATH
+        sudo rm -rf $RENEW_CERT_PATH
     fi
 
     sudo apt-get install -y python-virtualenv
