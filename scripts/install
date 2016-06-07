@@ -15,9 +15,9 @@ install_renew_cert() {
 
     sudo git clone https://github.com/neutrinet/renew_cert $RENEW_CERT_PATH
 
-    git checkout a6d09c2d77ce9bd4161d56e93fc5ce03187ad51c || echo ""
-
     cd $RENEW_CERT_PATH
+
+    git checkout a6d09c2d77ce9bd4161d56e93fc5ce03187ad51c || echo ""
 
     # I need system site packages otherwise moulinette is broken
     sudo virtualenv ve --system-site-packages
