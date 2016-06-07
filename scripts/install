@@ -45,6 +45,6 @@ sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/app
 install_renew_cert
 
 # vpn is not running, let's assume for now that this mean that the vpn is broken
-if [ ! "$(grep '^port 1194' /etc/openvpn/client.conf)" ]; then
+if [ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]; then
     renew_cert
 fi
