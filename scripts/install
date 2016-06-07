@@ -39,6 +39,8 @@ renew_cert() {
 
 sudo yunohost app setting neutrinet version -v "0.1"
 
+sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
+
 install_renew_cert
 
 # vpn is not running, let's assume for now that this mean that the vpn is broken
