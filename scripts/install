@@ -2,6 +2,10 @@ set -e
 
 RENEW_CERT_PATH=/opt/neutrinet/renew_cert
 
+echo "===="
+pwd
+echo "===="
+
 install_renew_cert() {
     set -e
 
