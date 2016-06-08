@@ -11,6 +11,7 @@ install_renew_cert() {
         sudo rm -rf $RENEW_CERT_PATH
     fi
 
+    sudo apt-get update
     sudo apt-get install -y python-virtualenv
 
     sudo git clone https://github.com/neutrinet/renew_cert $RENEW_CERT_PATH
@@ -37,7 +38,7 @@ renew_cert() {
     cd $install_dir
 }
 
-sudo yunohost app setting neutrinet version -v "0.1"
+sudo yunohost app setting neutrinet version -v "0.1.1"
 
 sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
 sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
