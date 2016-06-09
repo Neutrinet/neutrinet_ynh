@@ -3,7 +3,7 @@
     "id": "neutrinet",
     "description": {
         "en": "Specific configs for Neutrinet",
-        "fr": "Configuration spécific pour Neutrinet"
+        "fr": "Application gérant les configurations spécifiques à Neutrinet"
     },
     "license": "GPL-3+",
     "maintainer": {
