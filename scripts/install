@@ -6,6 +6,8 @@ source ./commons
 domain=$1
 path=$2
 
+path=${path%/}
+
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a neutrinet
 if [[ ! $? -eq 0 ]]; then
@@ -21,7 +23,7 @@ install_static_file() {
 
     sudo chown -R www-data: $final_path
 
-    if [[ "$path" == "" ]] || [[ "$path" == "/" ]]; then
+    if [[ "$path" == "" ]]; then
       sed -i "s@PATHTOCHANGE@/@g" ../conf/nginx.conf
     else
       sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
