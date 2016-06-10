@@ -15,7 +15,7 @@ fi
 install_static_file() {
     set -e
 
-    final_path=/var/www/neutrinet
+    final_path=/var/www/neutrinet/
     sudo mkdir -p $final_path
     sudo cp -a ../sources/. $final_path
 
