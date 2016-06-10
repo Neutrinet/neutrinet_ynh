@@ -1,5 +1,7 @@
 set -e
 
+source ./commons
+
 # Retrieve arguments
 domain=$1
 path=$2
@@ -10,7 +12,23 @@ if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
 
-source ./commons
+install_static_file() {
+    final_path=/var/www/neutrinet
+    sudo mkdir -p $final_path
+    sudo cp -a ../sources/ $final_path
+
+    sudo chown -R www-data: $final_path
+
+    if [[ "$path" == "" ]]; then
+      sed -i "s@PATHTOCHANGE@/@g" ../conf/nginx.conf
+    else
+      sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
+    fi
+
+    sed -i "s@ALIASTOCHANGE@$final_path/@g" ../conf/nginx.conf
+
+    sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/neutrinet.conf
+}
 
 install_renew_cert() {
     set -e
@@ -52,6 +70,8 @@ sudo yunohost app setting neutrinet version -v "0.1.1"
 
 sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
 sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
+
+install_static_file
 
 install_renew_cert
 
