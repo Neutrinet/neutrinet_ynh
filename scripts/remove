@@ -1,3 +1,8 @@
 source ./commons
 
+domain=$(sudo yunohost app setting neutrinet domain)
+
 sudo rm -rf $RENEW_CERT_PATH
+sudo rm -rf /var/www/neutrinet/
+
+sudo rm -f /etc/nginx/conf.d/$domain.d/neutrinet.conf
