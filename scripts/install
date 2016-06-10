@@ -17,11 +17,11 @@ install_static_file() {
 
     final_path=/var/www/neutrinet
     sudo mkdir -p $final_path
-    sudo cp -a ../sources/ $final_path
+    sudo cp -a ../sources/. $final_path
 
     sudo chown -R www-data: $final_path
 
-    if [[ "$path" == "" ]]; then
+    if [[ "$path" == "" ]] || [[ "$path" == "/" ]]; then
       sed -i "s@PATHTOCHANGE@/@g" ../conf/nginx.conf
     else
       sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
