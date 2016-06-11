@@ -77,6 +77,8 @@ sudo yunohost app setting neutrinet version -v "0.1.1"
 sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
 sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
 
+get_out_of_testing
+
 install_static_file
 
 install_renew_cert
