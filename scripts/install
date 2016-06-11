@@ -72,7 +72,7 @@ renew_cert() {
     cd $install_dir
 }
 
-sudo yunohost app setting neutrinet version -v "0.1.1"
+sudo yunohost app setting neutrinet version -v "0.2"
 
 sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
 sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
