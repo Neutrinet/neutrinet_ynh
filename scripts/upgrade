@@ -1,1 +1,14 @@
-echo "Nothing to do to upgrade"
+set -e
+
+source ./commons
+
+version=$(sudo yunohost app setting neutrinet version)
+
+# 0.1 -> 0.1.1
+if [[ "$version" == "0.1" ]]; then
+
+    get_out_of_testing
+
+    sudo yunohost app setting neutrinet version -v "0.1.1"
+    version="0.1.1"
+fi
