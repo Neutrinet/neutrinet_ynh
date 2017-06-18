@@ -12,3 +12,15 @@ if [[ "$version" == "0.1.1" ]]; then
     sudo yunohost app setting neutrinet version -v "0.2"
     version="0.2"
 fi
+
+# 0.2 -> 0.2.1
+if [[ "$version" == "0.2" ]]; then
+
+    get_out_of_testing
+
+    sudo yunohost app setting neutrinet version -v "0.2.1"
+    version="0.2.1"
+
+    cd /opt/neutrinet/renew_cert
+    sudo ve/bin/python renew_from_cube.py
+fi
