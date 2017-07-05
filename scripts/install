@@ -72,10 +72,22 @@ renew_cert() {
     cd $install_dir
 }
 
+install_neutrinet_apps_list() {
+    if ! sudo yunohost app listlists | grep -q "neutrinet:"; then
+      sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
+    fi
+}
+
+install_labriqueinternet_apps_list() {
+    if ! sudo yunohost app listlists | grep -q "labriqueinternet :"; then
+      sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
+    fi
+}
+
 sudo yunohost app setting neutrinet version -v "0.2"
 
-sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
-sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
+install_neutrinet_apps_list
+install_labriqueinternet_apps_list
 
 get_out_of_testing
 
