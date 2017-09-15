@@ -79,7 +79,7 @@ install_neutrinet_apps_list() {
 }
 
 install_labriqueinternet_apps_list() {
-    if ! sudo yunohost app listlists | grep -q "labriqueinternet :"; then
+    if ! sudo yunohost app listlists | grep -q "labriqueinternet:"; then
       sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
     fi
 }
