@@ -28,12 +28,16 @@ if [[ "$version" == "0.2.1" ]]; then
     version="0.2.2"
 
     cd $RENEW_CERT_PATH
+    git checkout master
     git pull origin master
     sudo ve/bin/python renew_from_cube.py --cron
 
     cat <<EOF > /etc/cron.daily/neutrinet-renew-cert
 #!/bin/bash
-cd $RENEW_CERT_PATH && git pull origin master && ve/bin/python renew_from_cube.py --cron
+cd $RENEW_CERT_PATH
+git checkout master
+git pull origin master
+ve/bin/python renew_from_cube.py --cron
 EOF
     chmod 0755 /etc/cron.daily/neutrinet-renew-cert
 fi
