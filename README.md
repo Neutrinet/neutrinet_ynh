@@ -40,3 +40,8 @@ After `Running command 'yunohost app setting vpnclient login_passphrase -v "xxxx
     Failed to open /dev/tty: No such device or address
 
 It doesn't prevent the script from running.
+
+# Publish a new version of the app
+
+- edit the [upgrade](scripts/upgrade) script to bump the version
+- update the `revision` with the current `sha` on the `master` branch, update the `lastUpdate` field in the [apps.json](https://neutrinet.be/apps.json) file
