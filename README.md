@@ -45,3 +45,8 @@ It doesn't prevent the script from running.
 
 - edit the [upgrade](scripts/upgrade) script to bump the version
 - update the `revision` with the current `sha` on the `master` branch, update the `lastUpdate` field in the [apps.json](https://neutrinet.be/apps.json) file
+- test the updated version: 
+  - check current version of the app on your cube: `yunohost app setting neutrinet version`
+  - update the app with the latest version from master: `yunohost app upgrade neutrinet -u https://github.com/Neutrinet/neutrinet_ynh`
+  - check the app has been updated: `yunohost app setting neutrinet version`
+  - set the app to a previous version if you want to re-test the update: `yunohost app setting neutrinet version -v "0.2.2"`
