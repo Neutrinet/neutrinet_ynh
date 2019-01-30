@@ -40,3 +40,9 @@ EOF
     sudo chown root:root /etc/cron.daily/neutrinet-renew-cert
     sudo chmod 0755 /etc/cron.daily/neutrinet-renew-cert
 fi
+
+# 0.2.2 -> 0.2.3
+if [[ "$version" == "0.2.2" ]]; then
+    sudo yunohost app setting neutrinet version -v "0.2.3"
+    version="0.2.3"
+fi
