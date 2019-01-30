@@ -43,6 +43,11 @@ fi
 
 # 0.2.2 -> 0.2.3
 if [[ "$version" == "0.2.2" ]]; then
+    final_path=/var/www/neutrinet/
+    sudo mkdir -p $final_path
+    sudo cp -a ../sources/. $final_path
+    sudo chown -R www-data: $final_path
+
     sudo yunohost app setting neutrinet version -v "0.2.3"
     version="0.2.3"
 fi
