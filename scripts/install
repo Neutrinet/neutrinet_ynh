@@ -87,7 +87,7 @@ mkdir --parents $final_path
 ynh_print_info "Installing static site..."
 
 cp -a ../sources/. $final_path
-chown -R www-data: $final_path
+chown -R $app_user: $final_path
 
 sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
 sed -i "s@ALIASTOCHANGE@$final_path@g" ../conf/nginx.conf
@@ -102,21 +102,13 @@ service nginx reload
 
 ynh_print_info "Installing automatic vpn certificate renewal..."
 
-if [[ -e $renew_cert_path ]]; then
-    rm -rf $renew_cert_path
-fi
-
 git clone https://github.com/neutrinet/renew_cert $renew_cert_path
+# TODO: Is the || true needed?
+(cd $renew_cert_path; git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755 || true)
 
-install_dir=$(pwd)
-cd $renew_cert_path
-git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755 || echo ""
-
-# I need system site packages otherwise moulinette is broken
-virtualenv ve --system-site-packages
-ve/bin/pip install -r requirements.txt
-
-cd $install_dir
+# We need system site packages otherwise moulinette is broken
+(cd $renew_cert_path; virtualenv ve --system-site-packages)
+(cd $renew_cert_path; ve/bin/pip install -r requirements.txt)
 
 #=================================================
 # SETTING UP CRONTAB
@@ -124,6 +116,7 @@ cd $install_dir
 
 ynh_print_info "Setting up cron job for renewal..."
 
+# TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py --cron"` (or even $app_user?)
 cat <<EOF > /etc/cron.daily/neutrinet-renew-cert
 #!/bin/bash
 cd $renew_cert_path
@@ -164,6 +157,6 @@ EOF
 
 # If vpn is not running, we assume that this means that the vpn is broken
 if [[ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]]; then
-    (cd $renew_cert_path; ve/bin/python renew_from_cube.py)
+    (cd $renew_cert_path; ve/bin/python renew_from_cube.py) # TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py --cron"` (or even $app_user?)
 fi
 
