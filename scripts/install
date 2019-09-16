@@ -1,77 +1,140 @@
-set -e
+#!/bin/bash
 
-source ./commons
+#=================================================
+# GENERIC START
+#=================================================
 
-# Retrieve arguments
-domain=$1
-path=$2
+# TODO: I assume this happens because of the manifest now?
+#  sudo yunohost app setting neutrinet version -v "0.3"
 
-path=${path%/}
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain$path -a neutrinet
-if [[ ! $? -eq 0 ]]; then
-    exit 1
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
+domain=$YNH_APP_ARG_DOMAIN
+path=$YNH_APP_ARG_PATH
+app=$YNH_APP_INSTANCE_NAME
+app_user="www-data"
+
+#==================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#==================================================
+
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die "The path $final_path already contains a folder"
+
+renew_cert_path=/opt/$app/renew_cert
+test ! -e "$renew_cert_path" || ynh_die "The path $renew_cert_path already contains a folder"
+
+# Normalize the url path syntax
+path=$(ynh_normalize_url_path $path)
+
+# Check web path availability
+ynh_webpath_available $domain $path
+# Register (book) web path
+ynh_webpath_register $app $domain $path
+
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app path $path
+ynh_app_setting_set $app app_user $app_user
+ynh_app_setting_set $app final_path $final_path
+ynh_app_setting_set $app renew_cert_path $renew_cert_path
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+ynh_print_info "Installing dependencies..."
+
+apt-get update
+ynh_install_app_dependencies git virtualenv python-virtualenv
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Now www-data is used. Check if this is really needed
+# We'll keep using www-data for now
+# if not needed:
+#  app_user=$app
+#  ynh_app_setting_set $app app_user $app_user
+mkdir --parents $final_path
+#  useradd $app_user --home-dir=$final_path
+
+#=================================================
+# INSTALL STATIC FILE
+#=================================================
+
+ynh_print_info "Installing static site..."
+
+cp -a ../sources/. $final_path
+chown -R www-data: $final_path
+
+sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
+sed -i "s@ALIASTOCHANGE@$final_path@g" ../conf/nginx.conf
+
+cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/neutrinet.conf
+
+service nginx reload
+
+#=================================================
+# INSTALL REWEW CERT
+#=================================================
+
+ynh_print_info "Installing automatic vpn certificate renewal..."
+
+if [[ -e $renew_cert_path ]]; then
+    rm -rf $renew_cert_path
 fi
 
-install_static_file() {
-    set -e
+git clone https://github.com/neutrinet/renew_cert $renew_cert_path
 
-    final_path=/var/www/neutrinet/
-    sudo mkdir -p $final_path
-    sudo cp -a ../sources/. $final_path
+install_dir=$(pwd)
+cd $renew_cert_path
+git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755 || echo ""
 
-    sudo chown -R www-data: $final_path
+# I need system site packages otherwise moulinette is broken
+virtualenv ve --system-site-packages
+ve/bin/pip install -r requirements.txt
 
-    if [[ "$path" == "" ]]; then
-      sed -i "s@PATHTOCHANGE@/@g" ../conf/nginx.conf
-    else
-      sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
-    fi
+cd $install_dir
 
-    sed -i "s@ALIASTOCHANGE@$final_path@g" ../conf/nginx.conf
+#=================================================
+# SETTING UP CRONTAB
+#=================================================
 
-    sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/neutrinet.conf
+ynh_print_info "Setting up cron job for renewal..."
 
-    sudo service nginx reload
-}
+cat <<EOF > /etc/cron.daily/neutrinet-renew-cert
+#!/bin/bash
+cd $renew_cert_path
+ve/bin/python renew_from_cube.py --cron
+EOF
 
-install_renew_cert() {
-    set -e
+chown root:root /etc/cron.daily/neutrinet-renew-cert
+chmod 0755 /etc/cron.daily/neutrinet-renew-cert
 
-    install_dir=$(pwd)
-
-    if [ -e $RENEW_CERT_PATH ]; then
-        sudo rm -rf $RENEW_CERT_PATH
-    fi
-
-    sudo apt-get update
-    sudo apt-get install -y python-virtualenv
-
-    sudo git clone https://github.com/neutrinet/renew_cert $RENEW_CERT_PATH
-
-    cd $RENEW_CERT_PATH
-
-    sudo git checkout ccc5b6b58010bb4166c2ae1a72df340395827f99 || echo ""
-
-    # I need system site packages otherwise moulinette is broken
-    sudo virtualenv ve --system-site-packages
-    sudo ve/bin/pip install -r requirements.txt
-
-    cd $install_dir
-}
-
-renew_cert() {
-    set -e
-
-    install_dir=$(pwd)
-
-    cd $RENEW_CERT_PATH
-    sudo ve/bin/python renew_from_cube.py
-
-    cd $install_dir
-}
-
+# TODO: What to do with the packagelists?
+<<EOF
 install_neutrinet_apps_list() {
     if ! sudo yunohost app listlists | grep -q "neutrinet:"; then
       sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
@@ -84,18 +147,23 @@ install_labriqueinternet_apps_list() {
     fi
 }
 
-sudo yunohost app setting neutrinet version -v "0.2"
-
 install_neutrinet_apps_list
 install_labriqueinternet_apps_list
+EOF
 
-get_out_of_testing
+#=================================================
+# SETUP SSOWAT
+#=================================================
 
-install_static_file
+# Check what to do to keep it private (is it private by default?)
 
-install_renew_cert
 
-# vpn is not running, let's assume for now that this mean that the vpn is broken
-if [ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]; then
-    renew_cert
+#=================================================
+# FINALIZATION
+#=================================================
+
+# If vpn is not running, we assume that this means that the vpn is broken
+if [[ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]]; then
+    (cd $renew_cert_path; ve/bin/python renew_from_cube.py)
 fi
+
