@@ -1,8 +1,54 @@
-source ./commons
+#!/bin/bash
 
-domain=$(sudo yunohost app setting neutrinet domain)
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-sudo rm -rf $RENEW_CERT_PATH
-sudo rm -rf /var/www/neutrinet/
+source /usr/share/yunohost/helpers
+source _common.sh
 
-sudo rm -f /etc/nginx/conf.d/$domain.d/neutrinet.conf
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get $app domain)
+path=$(ynh_app_setting_get $app path)
+app_user=$(ynh_app_setting_get $app app_user)
+final_path=$(ynh_app_setting_get $app final_path)
+final_path=$(ynh_app_setting_get $renew_cert_path renew_cert_path)
+
+#=================================================
+# STANDARD REMOVE
+#=================================================
+
+ynh_print_info "Removing static site..."
+
+rm -rf $final_path
+rm -f /etc/nginx/conf.d/$domain.d/neutrinet.conf
+service nginx reload
+
+ynh_print_info "Removing automatic vpn certificate renewal..."
+
+rm -rf $renew_cert_path
+rm -rf /etc/cron.daily/neutrinet-renew-cert
+
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
+
+ynh_print_info "Removing dependencies..."
+
+ynh_remove_app_dependencies
+
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
+
+# TODO: Check if this is needed. Rn we use www-data so we can't remove it
+#  ynh_print_info "Removing system user..."
+#  ynh_system_user_delete $app_user
+
