@@ -92,7 +92,7 @@ chown -R $app_user: $final_path
 sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
 sed -i "s@ALIASTOCHANGE@$final_path@g" ../conf/nginx.conf
 
-cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/neutrinet.conf
+cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 service nginx reload
 
@@ -110,6 +110,8 @@ git clone https://github.com/neutrinet/renew_cert $renew_cert_path
 (cd $renew_cert_path; virtualenv ve --system-site-packages)
 (cd $renew_cert_path; ve/bin/pip install -r requirements.txt)
 
+# TODO: we don't chown $renew_cert_path. Is that OK?
+
 #=================================================
 # SETTING UP CRONTAB
 #=================================================
@@ -117,14 +119,14 @@ git clone https://github.com/neutrinet/renew_cert $renew_cert_path
 ynh_print_info "Setting up cron job for renewal..."
 
 # TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py --cron"` (or even $app_user?)
-cat <<EOF > /etc/cron.daily/neutrinet-renew-cert
+cat <<EOF > /etc/cron.daily/$app-renew-cert
 #!/bin/bash
 cd $renew_cert_path
 ve/bin/python renew_from_cube.py --cron
 EOF
 
-chown root:root /etc/cron.daily/neutrinet-renew-cert
-chmod 0755 /etc/cron.daily/neutrinet-renew-cert
+chown root:root /etc/cron.daily/$app-renew-cert
+chmod 0755 /etc/cron.daily/$app-renew-cert
 
 # TODO: What to do with the packagelists?
 <<EOF
