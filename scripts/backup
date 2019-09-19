@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source /usr/share/yunohost/helpers
+source _common.sh
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_abort_if_errors
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get $app domain)
+path=$(ynh_app_setting_get $app path)
+app_user=$(ynh_app_setting_get $app app_user)
+final_path=$(ynh_app_setting_get $app final_path)
+renew_cert_path=$(ynh_app_setting_get $renew_cert_path renew_cert_path)
+
+#=================================================
+# STANDARD BACKUP STEPS
+#=================================================
+# BACKUP THE NGINX CONFIGURATION
+#=================================================
+
+ynh_print_info "Backing up..."
+
+ynh_backup "$final_path"
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+ynh_backup $renew_cert_path
+ynh_backup "/etc/cron.daily/$app-renew-cert"
+
