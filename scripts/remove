@@ -19,7 +19,7 @@ domain=$(ynh_app_setting_get $app domain)
 path=$(ynh_app_setting_get $app path)
 app_user=$(ynh_app_setting_get $app app_user)
 final_path=$(ynh_app_setting_get $app final_path)
-renew_cert_path=$(ynh_app_setting_get $renew_cert_path renew_cert_path)
+renew_cert_path=$(ynh_app_setting_get $app renew_cert_path)
 
 #=================================================
 # STANDARD REMOVE
