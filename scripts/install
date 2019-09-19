@@ -128,7 +128,9 @@ EOF
 chown root:root /etc/cron.daily/$app-renew-cert
 chmod 0755 /etc/cron.daily/$app-renew-cert
 
-# TODO: What to do with the packagelists?
+# TODO: What to do with the packagelists? None are installed. But do we need them?
+#       Installed lists are https://app.yunohost.org/community.json and https://app.yunohost.org/apps.json
+#       We need roundcube, hotspot and neutrinet apps
 <<EOF
 install_neutrinet_apps_list() {
     if ! sudo yunohost app listlists | grep -q "neutrinet:"; then
@@ -159,6 +161,7 @@ EOF
 
 # If vpn is not running, we assume that this means that the vpn is broken
 if [[ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]]; then
-    (cd $renew_cert_path; ve/bin/python renew_from_cube.py) # TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py --cron"` (or even $app_user?)
+    ynh_print_info "Renewing certificates..."
+    (cd $renew_cert_path; ve/bin/python renew_from_cube.py) # TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py"` (or even $app_user?)
 fi
 
