@@ -33,7 +33,7 @@ service nginx reload
 
 ynh_print_info "Removing automatic vpn certificate renewal..."
 
-rm -rf $renew_cert_path
+rm -rf $renew_cert_path/..
 rm -rf /etc/cron.daily/neutrinet-renew-cert
 
 #=================================================
