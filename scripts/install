@@ -11,8 +11,8 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source _common.sh
 source /usr/share/yunohost/helpers
+source _common.sh
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -128,25 +128,6 @@ EOF
 chown root:root /etc/cron.daily/$app-renew-cert
 chmod 0755 /etc/cron.daily/$app-renew-cert
 
-# TODO: What to do with the packagelists? None are installed. But do we need them?
-#       Installed lists are https://app.yunohost.org/community.json and https://app.yunohost.org/apps.json
-#       We need roundcube, hotspot and neutrinet apps
-<<EOF
-install_neutrinet_apps_list() {
-    if ! sudo yunohost app listlists | grep -q "neutrinet:"; then
-      sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
-    fi
-}
-
-install_labriqueinternet_apps_list() {
-    if ! sudo yunohost app listlists | grep -q "labriqueinternet:"; then
-      sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
-    fi
-}
-
-install_neutrinet_apps_list
-install_labriqueinternet_apps_list
-EOF
 
 #=================================================
 # SETUP SSOWAT
