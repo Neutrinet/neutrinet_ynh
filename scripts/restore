@@ -38,8 +38,6 @@ test ! -e "$opt_path" || ynh_die "The path $opt_path already contains a folder"
 
 # Check web path availability
 ynh_webpath_available $domain $path_url || ynh_die "$domain$path_url is no longer available"
-# Register (book) web path
-ynh_webpath_register $app $domain $path_url
 
 #=================================================
 # STANDARD MODIFICATIONS
