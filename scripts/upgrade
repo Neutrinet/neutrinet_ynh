@@ -29,26 +29,28 @@ if [[ "$version" < "0.3.0~ynh1" ]]; then
 
   # 0.2 -> 0.2.1
   if [[ "$version" == "0.2" ]]; then
+    opt_path=/opt/$app
     yunohost app setting $app version -v "0.2.1"
     version="0.2.1"
 
-    cd $RENEW_CERT_PATH
+    cd $opt_path/renew_cert
     ve/bin/python renew_from_cube.py
   fi
 
   # 0.2.1 -> 0.2.2
   if [[ "$version" == "0.2.1" ]]; then
+    opt_path=/opt/$app
     yunohost app setting $app version -v "0.2.2"
     version="0.2.2"
 
-    cd $RENEW_CERT_PATH
+    cd $opt_path/renew_cert
     git fetch
     git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755
     ve/bin/python renew_from_cube.py --cron
 
     cat <<EOF > /etc/cron.daily/$app-renew-cert
   #!/bin/bash
-  cd $RENEW_CERT_PATH
+  cd $opt_path/renew_cert
   ve/bin/python renew_from_cube.py --cron
   EOF
     chown root:root /etc/cron.daily/$app-renew-cert
@@ -57,11 +59,11 @@ if [[ "$version" < "0.3.0~ynh1" ]]; then
 
   # 0.2.2 -> 0.2.3
   if [[ "$version" == "0.2.2" ]]; then
-    final_path=/var/www/$app/
+    www_path=/var/www/$app/
 
-    mkdir -p $final_path
-    cp -a ../sources/. $final_path
-    chown -R www-data: $final_path
+    mkdir -p $www_path
+    cp -a ../sources/. $www_path
+    chown -R www-data: $www_path
 
     yunohost app setting $app version -v "0.2.3"
     version="0.2.3"
@@ -70,18 +72,18 @@ if [[ "$version" < "0.3.0~ynh1" ]]; then
   # 0.2.3 -> 0.3.0~ynh1
   if [[ "$version" == "0.2.3" ]]; then
     domain=$(yunohost app setting $app domain)
-    path=$(yunohost app setting $app path)
+    path_url=$(yunohost app setting $app path_url)
     app_user="www-data"
 
-    final_path=/var/www/$app
-    renew_cert_path=/opt/$app/renew_cert
-    path=$(ynh_normalize_url_path $path)
+    www_path=/var/www/$app
+    opt_path=/opt/$app
+    path_url=$(ynh_normalize_url_path $path_url)
 
     ynh_app_setting_set $app domain $domain
-    ynh_app_setting_set $app path $path
+    ynh_app_setting_set $app path $path_url
     ynh_app_setting_set $app app_user $app_user
-    ynh_app_setting_set $app final_path $final_path
-    ynh_app_setting_set $app renew_cert_path $renew_cert_path
+    ynh_app_setting_set $app www_path $www_path
+    ynh_app_setting_set $app opt_path $opt_path
 
     sudo yunohost app setting $app version -v "0.3.0~ynh1"
     version="0.3.0~ynh1"
@@ -99,10 +101,10 @@ fi
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-path=$(ynh_app_setting_get $app path)
+path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-renew_cert_path=$(ynh_app_setting_get $app renew_cert_path)
+www_path=$(ynh_app_setting_get $app www_path)
+opt_path=$(ynh_app_setting_get $app opt_path)
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP

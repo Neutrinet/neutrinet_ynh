@@ -25,37 +25,37 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path=$YNH_APP_ARG_PATH
+path_url=$YNH_APP_ARG_PATH
 app=$YNH_APP_INSTANCE_NAME
-app_user="www-data"
+app_user=$app
 
 #==================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #==================================================
 
-final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die "The path $final_path already contains a folder"
+www_path=/var/www/$app
+test ! -e "$www_path" || ynh_die "The path $www_path already contains a folder"
 
-renew_cert_path=/opt/$app/renew_cert
-test ! -e "$renew_cert_path" || ynh_die "The path $renew_cert_path already contains a folder"
+opt_path=/opt/$app
+test ! -e "$opt_path" || ynh_die "The path $opt_path already contains a folder"
 
 # Normalize the url path syntax
-path=$(ynh_normalize_url_path $path)
+path_url=$(ynh_normalize_url_path $path_url)
 
 # Check web path availability
-ynh_webpath_available $domain $path
+ynh_webpath_available $domain $path_url || ynh_die "$domain$path_url is not available"
 # Register (book) web path
-ynh_webpath_register $app $domain $path
+ynh_webpath_register $app $domain $path_url
 
 #=================================================
 # STORE SETTINGS
 #=================================================
 
 ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path
+ynh_app_setting_set $app path_url $path_url
 ynh_app_setting_set $app app_user $app_user
-ynh_app_setting_set $app final_path $final_path
-ynh_app_setting_set $app renew_cert_path $renew_cert_path
+ynh_app_setting_set $app www_path $www_path
+ynh_app_setting_set $app opt_path $opt_path
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -72,13 +72,8 @@ ynh_install_app_dependencies git virtualenv python-virtualenv
 # CREATE DEDICATED USER
 #=================================================
 
-# Now www-data is used. Check if this is really needed
-# We'll keep using www-data for now
-# if not needed:
-#  app_user=$app
-#  ynh_app_setting_set $app app_user $app_user
-mkdir --parents $final_path
-#  useradd $app_user --home-dir=$final_path
+mkdir --parents $www_path
+useradd $app_user --home-dir=$www_path
 
 #=================================================
 # INSTALL STATIC FILE
@@ -86,11 +81,11 @@ mkdir --parents $final_path
 
 ynh_print_info "Installing static site..."
 
-cp -a ../sources/. $final_path
-chown -R $app_user: $final_path
+cp -a ../sources/. $www_path
+chown -R $app_user: $www_path
 
-sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
-sed -i "s@ALIASTOCHANGE@$final_path@g" ../conf/nginx.conf
+sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
+sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
 
 cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
@@ -102,15 +97,14 @@ service nginx reload
 
 ynh_print_info "Installing automatic vpn certificate renewal..."
 
-git clone https://github.com/neutrinet/renew_cert $renew_cert_path
-# TODO: Is the || true needed?
-(cd $renew_cert_path; git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755 || true)
+git clone https://github.com/neutrinet/renew_cert $opt_path/renew_cert
+(cd $opt_path/renew_cert; git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755)
 
 # We need system site packages otherwise moulinette is broken
-(cd $renew_cert_path; virtualenv ve --system-site-packages)
-(cd $renew_cert_path; ve/bin/pip install -r requirements.txt)
+(cd $opt_path/renew_cert; virtualenv ve --system-site-packages)
+(cd $opt_path/renew_cert; ve/bin/pip install -r requirements.txt)
 
-# TODO: we don't chown $renew_cert_path. Is that OK?
+chown -R $app_user: $opt_path
 
 #=================================================
 # SETTING UP CRONTAB
@@ -118,23 +112,14 @@ git clone https://github.com/neutrinet/renew_cert $renew_cert_path
 
 ynh_print_info "Setting up cron job for renewal..."
 
-# TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py --cron"` (or even $app_user?)
 cat <<EOF > /etc/cron.daily/$app-renew-cert
 #!/bin/bash
-cd $renew_cert_path
+cd $opt_path/renew_cert
 ve/bin/python renew_from_cube.py --cron
 EOF
 
 chown root:root /etc/cron.daily/$app-renew-cert
 chmod 0755 /etc/cron.daily/$app-renew-cert
-
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-
-# Check what to do to keep it private (is it private by default?)
-
 
 #=================================================
 # FINALIZATION
@@ -143,6 +128,6 @@ chmod 0755 /etc/cron.daily/$app-renew-cert
 # If vpn is not running, we assume that this means that the vpn is broken
 if [[ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]]; then
     ynh_print_info "Renewing certificates..."
-    (cd $renew_cert_path; ve/bin/python renew_from_cube.py) # TODO: Is it ok that root does this? Maybe this should be `su - www-data -c "ve/bin/python renew_from_cube.py"` (or even $app_user?)
+    (cd $opt_path/renew_cert; ve/bin/python renew_from_cube.py)
 fi
 

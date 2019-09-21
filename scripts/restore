@@ -22,10 +22,10 @@ ynh_abort_if_errors
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-path=$(ynh_app_setting_get $app path)
+path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-renew_cert_path=$(ynh_app_setting_get $app renew_cert_path)
+www_path=$(ynh_app_setting_get $app www_path)
+opt_path=$(ynh_app_setting_get $app opt_path)
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
@@ -33,13 +33,13 @@ renew_cert_path=$(ynh_app_setting_get $app renew_cert_path)
 
 ynh_print_info "Checking for conflicts..."
 
-test ! -e "$final_path" || ynh_die "The path $final_path already contains a folder"
-test ! -e "$renew_cert_path" || ynh_die "The path $renew_cert_path already contains a folder"
+test ! -e "$www_path" || ynh_die "The path $www_path already contains a folder"
+test ! -e "$opt_path" || ynh_die "The path $opt_path already contains a folder"
 
 # Check web path availability
-ynh_webpath_available $domain $path || ynh_die "$domain$path_url is no longer available"
+ynh_webpath_available $domain $path_url || ynh_die "$domain$path_url is no longer available"
 # Register (book) web path
-ynh_webpath_register $app $domain $path
+ynh_webpath_register $app $domain $path_url
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -58,11 +58,11 @@ ynh_install_app_dependencies git virtualenv python-virtualenv
 
 ynh_print_info "Restoring files..."
 
-ynh_restore_file "$final_path"
+ynh_restore_file "$www_path"
 ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
-chown -R $app_user: $final_path
+chown -R $app_user: $www_path
 
-ynh_restore_file "$renew_cert_path"
+ynh_restore_file "$opt_path"
 ynh_restore_file "/etc/cron.daily/$app-renew-cert"
 chown root:root /etc/cron.daily/$app-renew-cert
 chmod 0755 /etc/cron.daily/$app-renew-cert

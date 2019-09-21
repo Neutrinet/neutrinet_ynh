@@ -16,10 +16,10 @@ source _common.sh
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-path=$(ynh_app_setting_get $app path)
+path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-renew_cert_path=$(ynh_app_setting_get $app renew_cert_path)
+www_path=$(ynh_app_setting_get $app www_path)
+opt_path=$(ynh_app_setting_get $app opt_path)
 
 #=================================================
 # STANDARD REMOVE
@@ -27,13 +27,13 @@ renew_cert_path=$(ynh_app_setting_get $app renew_cert_path)
 
 ynh_print_info "Removing static site..."
 
-rm -rf $final_path
+rm -rf $www_path
 rm -f /etc/nginx/conf.d/$domain.d/neutrinet.conf
 service nginx reload
 
 ynh_print_info "Removing automatic vpn certificate renewal..."
 
-rm -rf $renew_cert_path/..
+rm -rf $opt_path
 rm -rf /etc/cron.daily/neutrinet-renew-cert
 
 #=================================================
@@ -48,7 +48,6 @@ ynh_remove_app_dependencies
 # REMOVE DEDICATED USER
 #=================================================
 
-# TODO: Check if this is needed. Rn we use www-data so we can't remove it
-#  ynh_print_info "Removing system user..."
-#  ynh_system_user_delete $app_user
+ynh_print_info "Removing system user..."
+ynh_system_user_delete $app_user
 
