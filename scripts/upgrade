@@ -18,8 +18,8 @@ version=$(sudo yunohost app setting $app version)
 
 if [[ "$version" < "0.3.0~ynh1" ]]; then
   ynh_print_info "Ensuring backwards compatibility..."
-  ynh_print_warning "Reinstalling this app from the Neutrinet application list is advised over updating!"
-  ynh_print_warning "But if you want to yolo it, we're not gonna stop you ;)"
+  ynh_print_warn "Reinstalling this app from the Neutrinet application list is advised over updating!"
+  ynh_print_warn "But if you want to yolo it, we're not gonna stop you ;)"
 
   # 0.1.1 -> 0.2
   if [[ "$version" == "0.1.1" ]]; then
