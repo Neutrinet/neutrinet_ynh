@@ -3,11 +3,6 @@
 #=================================================
 # GENERIC START
 #=================================================
-
-# TODO: I assume this happens because of the manifest now?
-#  sudo yunohost app setting neutrinet version -v "0.3"
-
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 

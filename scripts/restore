@@ -51,6 +51,13 @@ apt-get update
 ynh_install_app_dependencies git virtualenv python-virtualenv
 
 #=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+mkdir --parents $www_path
+useradd $app_user --home-dir=$www_path
+
+#=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
 
