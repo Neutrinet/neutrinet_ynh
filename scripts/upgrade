@@ -49,10 +49,10 @@ if [[ "$version" < "0.3.0~ynh1" ]]; then
     ve/bin/python renew_from_cube.py --cron
 
     cat <<EOF > /etc/cron.daily/$app-renew-cert
-  #!/bin/bash
-  cd $opt_path/renew_cert
-  ve/bin/python renew_from_cube.py --cron
-  EOF
+#!/bin/bash
+cd $opt_path/renew_cert
+ve/bin/python renew_from_cube.py --cron
+EOF
     chown root:root /etc/cron.daily/$app-renew-cert
     chmod 0755 /etc/cron.daily/$app-renew-cert
   fi
