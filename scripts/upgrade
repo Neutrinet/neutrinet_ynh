@@ -128,4 +128,13 @@ ynh_abort_if_errors
 #=================================================
 
 ynh_print_info "Doing actual upgrade..."
+# Here is where the post 0.3.0~ynh1 upgrades should happen
+
+#=================================================
+# FINALIZATION
+#=================================================
+
+ynh_print_info "Checking certificates..."
+
+(cd $opt_path/renew_cert; ve/bin/python renew_from_cube.py)
 
