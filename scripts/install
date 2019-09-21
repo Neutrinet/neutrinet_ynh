@@ -29,16 +29,26 @@ app_user=$app
 #==================================================
 
 www_path=/var/www/$app
-test ! -e "$www_path" || ynh_die "The path $www_path already contains a folder"
+if [[ -e $www_path ]]
+then
+  ynh_die "The path $www_path already contains a folder"
+fi
 
 opt_path=/opt/$app
-test ! -e "$opt_path" || ynh_die "The path $opt_path already contains a folder"
+if [[ -e $opt_path ]]
+then
+  ynh_die "The path $opt_path already contains a folder"
+fi
 
 # Normalize the url path syntax
 path_url=$(ynh_normalize_url_path $path_url)
 
 # Check web path availability
-ynh_webpath_available $domain $path_url || ynh_die "$domain$path_url is not available"
+if ! ynh_webpath_available $domain $path_url
+then
+  ynh_die "$domain$path_url is not available"
+fi
+
 # Register (book) web path
 ynh_webpath_register $app $domain $path_url
 
@@ -60,8 +70,8 @@ ynh_app_setting_set $app opt_path $opt_path
 
 ynh_print_info "Installing dependencies..."
 
-apt-get update
-ynh_install_app_dependencies git virtualenv python-virtualenv
+ynh_package_update
+ynh_install_app_dependencies git virtualenv python3-virtualenv
 
 #=================================================
 # CREATE DEDICATED USER
@@ -87,18 +97,31 @@ cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 service nginx reload
 
 #=================================================
-# INSTALL REWEW CERT
+# INSTALL RENEW CERT
 #=================================================
 
-ynh_print_info "Installing automatic vpn certificate renewal..."
+renew_cert_repo="https://github.com/neutrinet/renew_cert"
+renew_cert_revision="01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755"
+renew_cert_path="$opt_path/renew_cert"
+renew_cert_virtualenv="$renew_cert_path/ve"
+renew_cert_python="$renew_cert_virtualenv/bin/python3"
+renew_cert_cron_script="renew_cert_cron.sh"
 
-git clone https://github.com/neutrinet/renew_cert $opt_path/renew_cert
-(cd $opt_path/renew_cert; git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755)
+ynh_print_info "Installing automatic VPN certificate renewal..."
+
+git clone $renew_cert_repo $renew_cert_path
+git -C $renew_cert_path checkout $renew_cert_revision
+
+# We wrap the python3 script that actually renew the VPN certificate
+# This wrapper will be used as a daily cron task
+cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
+
+# From now on we work in the renew_cert directory
+cd $renew_cert_path
 
 # We need system site packages otherwise moulinette is broken
-(cd $opt_path/renew_cert; virtualenv ve --system-site-packages)
-(cd $opt_path/renew_cert; ve/bin/pip install -r requirements.txt)
-
+virtualenv $renew_cert_virtualenv --system-site-packages
+ve/bin/pip install -r requirements.txt
 chown -R $app_user: $opt_path
 
 #=================================================
@@ -109,8 +132,8 @@ ynh_print_info "Setting up cron job for renewal..."
 
 cat <<EOF > /etc/cron.daily/$app-renew-cert
 #!/bin/bash
-cd $opt_path/renew_cert
-ve/bin/python renew_from_cube.py --cron
+cd $renew_cert_path
+RENEW_CERT_PYTHON="$renew_cert_virtualenv" $renew_cert_path/$renew_cert_cron_script
 EOF
 
 chown root:root /etc/cron.daily/$app-renew-cert
@@ -121,6 +144,4 @@ chmod 0755 /etc/cron.daily/$app-renew-cert
 #=================================================
 
 ynh_print_info "Checking certificates..."
-
-(cd $opt_path/renew_cert; ve/bin/python renew_from_cube.py)
-
+bash /etc/cron.daily/$app-renew-cert
