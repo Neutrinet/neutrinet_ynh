@@ -121,6 +121,7 @@ cd $renew_cert_path
 
 # We need system site packages otherwise moulinette is broken
 python3 -m venv $renew_cert_virtualenv --system-site-packages
+ve/bin/pip install wheel
 ve/bin/pip install -r requirements.txt
 
 ynh_print_info "Setting up permissions"
