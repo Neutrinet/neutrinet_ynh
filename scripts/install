@@ -139,7 +139,7 @@ ynh_print_info "Setting up cron job for renewal..."
 cat <<EOF > /etc/cron.daily/$app-renew-cert
 #!/bin/bash
 cd $renew_cert_path
-RENEW_CERT_PYTHON="$renew_cert_virtualenv" $renew_cert_path/$renew_cert_cron_script
+RENEW_CERT_PYTHON="$renew_cert_python" $renew_cert_path/$renew_cert_cron_script
 EOF
 
 chown root:root /etc/cron.daily/$app-renew-cert
