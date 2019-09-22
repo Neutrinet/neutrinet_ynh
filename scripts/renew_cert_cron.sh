@@ -13,12 +13,13 @@ OPENVPN_CONF_TEMPLATE="${OPENVPN_CONF_DIR}/client.conf.tpl"
 
 OPENVPN_CLIENT_LOGS="/var/log/openvpn-client.log"
 
-NEUTRINET_CONF_TEMPLATE="neutrinet_config_template"
+NEUTRINET_CONF_TEMPLATE="neutrinet_openvpn_config"
 
 if [[ -z $RENEW_CERT_PATH ]]
 then
   RENEW_CERT_PATH=$PWD
 fi
+
 if [[ -z $RENEW_CERT_PYTHON ]]
 then
   RENEW_CERT_PYTHON=$(command -v python3)
@@ -36,14 +37,22 @@ else
   exit 1
 fi
 
-{ read -r login && read -r password; } < $credentials_file
+login=$(head -n 1 $credentials_file)
+password=$(tail -n 1 $credentials_file)
 
-renew_dir=$($RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT $login -p $password -c $OPENVPN_USER_CERT)
+run_date=$(date +'%Y-%m-%d_%H:%M:%S')
+renew_dir="certs_$run_date"
 
-run_id=$(cut -d '_' -f 2- <<< $renew_dir)
+$RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT $login -p $password -c $OPENVPN_USER_CERT -d "$renew_dir" -v
+
+if [[ ! -d $renew_dir || ! -f $renew_dir/ca.crt || ! -f $renew_dir/client.crt || ! -f $renew_dir/client.key ]]
+then
+  echo "Couldn't find any new certificate in the $renew_dir directory."
+  exit 0
+fi
 
 echo "Saving old OpenVPN config"
-cp -r $OPENVPN_CONF_DIR{,.old_${run_id}}
+cp -r $OPENVPN_CONF_DIR{,.old_${run_date}}
 
 echo "Copying new OpenVPN config"
 cp "$NEUTRINET_CONF_TEMPLATE" "$OPENVPN_CONF_TEMPLATE"
@@ -87,11 +96,12 @@ then
   exit 0
 fi
 
-echo "Few, we're done, let's wait 2min to be sure that vpn is running, then restart hotspot"
+echo "Few, we're done, let's wait 2min to be sure the VPN is running, then restart hotspot"
 sleep 120
 
-echo "Restarting Hotspot"
-  if ! ynh-hotspot restart && ynh-hotspot status
-  then
-    >&2 echo "ERROR: Failed to restart Hotspot"
-    echo "Since it's not a critical part, let's continue"
+echo "Restarting hotspot"
+if ! ynh-hotspot restart && ynh-hotspot status
+then
+  >&2 echo "ERROR: Failed to restart hotspot"
+  echo "Since it's not a critical part, let's continue"
+fi

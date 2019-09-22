@@ -71,7 +71,7 @@ ynh_app_setting_set $app opt_path $opt_path
 ynh_print_info "Installing dependencies..."
 
 ynh_package_update
-ynh_install_app_dependencies git virtualenv python3-virtualenv
+ynh_install_app_dependencies git python3-venv libssl-dev libffi-dev python3-dev
 
 #=================================================
 # CREATE DEDICATED USER
@@ -101,7 +101,7 @@ service nginx reload
 #=================================================
 
 renew_cert_repo="https://github.com/neutrinet/renew_cert"
-renew_cert_revision="01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755"
+renew_cert_revision="b3c49c23d2ad3107a52d845a8ac12476b57be33e"
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_virtualenv="$renew_cert_path/ve"
 renew_cert_python="$renew_cert_virtualenv/bin/python3"
@@ -120,7 +120,7 @@ cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
 cd $renew_cert_path
 
 # We need system site packages otherwise moulinette is broken
-virtualenv $renew_cert_virtualenv --system-site-packages
+python3 -m venv $renew_cert_virtualenv --system-site-packages
 ve/bin/pip install -r requirements.txt
 chown -R $app_user: $opt_path
 
