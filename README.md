@@ -1,24 +1,20 @@
 # Overview
 
-This application is for Neutrinet members that have an Internet Cube configured has expected.
-
-It does 2 things:
-
+The neutrinet application is for Neutrinet members that have an Internet Cube configured and does 2 things:
 * It renews the vpn-certificates
-* Adds a webpage with contact information
+* Adds a webpage with genral information about Neutrinet
 
 # Installation
-
 ## From the webinterface
 
 First make sure you have the neutrinet_app list
 1. Go to the admin interface on your cube
-2. Click *Applications* > *Install* > At the bottom click *Manage application lists > Check in Application list if you have *neutrinet*
-3. If you have it, you're done. If not we'll add it. Under Custom applications lists you give *neutrinet* under Name. Under URL you add *https://neutrinet.be/apps.json* > Add
+2. Click *Applications* > *Install* > At the bottom click *Manage application lists* > Check in the Application list if you have *neutrinet*
+3. If you don't have it > under Custom applications lists you give *neutrinet* under Name. Under URL you give *https://neutrinet.be/apps.json* > Add
 
 The we can install the application
 1. Click *Applications* at the top of the page
-2. click *Install* > select *All apps* > search for *neutrinet*> click *Install* > Fill in the form (or just keep the defaults) and press Install just like you would install any app.
+2. click *Install* > select *All apps* > search for *neutrinet*> click *Install* > Fill in the form (or just keep the defaults) and press Install just like you would install any app from the webinterface
 
 ## From the CLI
 
@@ -34,13 +30,11 @@ Once you have the list, you can install the app using
 
 `yunohost app install neutrinet --debug`
 
-and answer the questions.
-
 # For contributers
 ## Publish a new version of the app
 
 * Edit the [manifest](manifest.json) file to bump the version
 * Edit the [upgrade](scripts/upgrade) script with the needed upgrades for previous installations
 * Test the updated version both for new installs and upgrades and make sure the other scripts ([backup](scripts/backup), [remove](scripts/remove) and [upgrade](scripts/upgrade)) also still work
-* In the [apps.json](https://neutrinet.be/apps.json) file, update the `revision` with the current `sha` on the `master` branch of the package, update the `lastUpdate` field, if you added things to the manifest file, you can add them ass well 
+* In the [apps.json](https://neutrinet.be/apps.json) file you must update the `revision` with the current `sha` on the `master` branch of the package and update the `lastUpdate` field. If you added things to the manifest file, you should add these changes ass well 
 
