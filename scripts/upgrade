@@ -111,7 +111,7 @@ service nginx reload
 ynh_print_info "Installing automatic VPN certificate renewal..."
 
 renew_cert_repo="https://github.com/neutrinet/renew_cert"
-renew_cert_version=$(cut -d '~' -f 1 <<< $version)
+renew_cert_version=$(jq .version ../manifest.json -r -e)
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_virtualenv="$renew_cert_path/ve"
 renew_cert_python="$renew_cert_virtualenv/bin/python3"

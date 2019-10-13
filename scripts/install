@@ -102,7 +102,7 @@ service nginx reload
 #=================================================
 
 renew_cert_repo="https://github.com/neutrinet/renew_cert"
-renew_cert_version="0.3.0"
+renew_cert_version=$(jq .version ../manifest.json -r -e)
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_virtualenv="$renew_cert_path/ve"
 renew_cert_python="$renew_cert_virtualenv/bin/python3"
