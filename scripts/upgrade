@@ -20,6 +20,7 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
+
 version=$(ynh_app_setting_get $app version)
 
 renew_cert_revision="0.3.0"
@@ -77,6 +78,8 @@ fi
 #=================================================
 
 if [[ $version < "0.3.0~ynh1" ]]; then
+  ynh_print_info "Upgrading dependecies..."
+  
   ynh_package_update
   ynh_install_app_dependencies python3-venv libssl-dev libffi-dev python3-dev
 fi
@@ -89,7 +92,7 @@ fi
 
 ynh_print_info "Installing static site..."
 
-cp ../sources/. $www_path
+cp -r ../sources/. $www_path
 chown -R $app_user: $www_path
 
 sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
