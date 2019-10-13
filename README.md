@@ -1,52 +1,46 @@
-# Neutrinet YunoHost App
+# Overview
 
 This application is for Neutrinet members that have an Internet Cube configured has expected.
 
-For now it does 2 things:
+It does 2 things:
 
-* fixed the situation where your certificate is outdated
-* install neutrinet app list for YunoHost so you get updates for this app
-* install labrique internet/internet cube app list for YunoHost so you get updates for this app
+* It renews the vpn-certificates
+* Adds a webpage with contact information
 
 # Installation
 
-Either put `https://github.com/neutrinet/neutrinet_ynh` in the administration interface at the bottom of the installation page or do this command in ssh:
+## From the webinterface
 
-    yunohost app install https://github.com/Neutrinet/neutrinet_ynh --verbose
+First make sure you have the neutrinet_app list
+1. Go to the admin interface on your cube
+2. Click *Applications* > *Install* > At the bottom click *Manage application lists > Check in Application list if you have *neutrinet*
+3. If you have it, you're done. If not we'll add it. Under Custom applications lists you give *neutrinet* under Name. Under URL you add *https://neutrinet.be/apps.json* > Add
 
+The we can install the application
+1. Click *Applications* at the top of the page
+2. click *Install* > select *All apps* > search for *neutrinet*> click *Install* > Fill in the form (or just keep the defaults) and press Install just like you would install any app.
 
-# Known and "normal" warning/error messages during installation
+## From the CLI
 
-If you see those, don't worry, it's not a bug.
+First check if you have a list, probably named *neutrinet*, with *https://neutrinet.be/apps.json* as url.
 
-After `+ sudo virtualenv ve --system-site-packages`
+`yunohost app listlists`
 
-    Compiling /tmp/pip-build-0Vk8QK/pexpect/pexpect/async.py ...
-      File "/tmp/pip-build-0Vk8QK/pexpect/pexpect/async.py", line 16
-        transport, pw = yield from asyncio.get_event_loop()\
-                                 ^
-    SyntaxError: invalid syntax
+If you don't have the list yet, you can add it using
 
-This is due to the fact that we don't use python3 but python2 and that doesn't change anything here.
+`yunohost app fetchlist --name neutrinet -u https://neutrinet.be/apps.json`
 
-After `Running command 'yunohost app setting vpnclient login_passphrase -v "xxxxxxxxxxxxxxxxxxxxx"' ... done`
+Once you have the list, you can install the app using
 
-    Failed to open /dev/tty: No such device or address
-    Failed to open /dev/tty: No such device or address
-    Failed to open /dev/tty: No such device or address
-    Failed to open /dev/tty: No such device or address
-    Failed to open /dev/tty: No such device or address
-    Failed to open /dev/tty: No such device or address
-    Failed to open /dev/tty: No such device or address
+`yunohost app install neutrinet --debug`
 
-It doesn't prevent the script from running.
+and answer the questions.
 
-# Publish a new version of the app
+# For contributers
+## Publish a new version of the app
 
-- edit the [upgrade](scripts/upgrade) script to bump the version
-- update the `revision` with the current `sha` on the `master` branch, update the `lastUpdate` field in the [apps.json](https://neutrinet.be/apps.json) file
-- test the updated version: 
-  - check current version of the app on your cube: `yunohost app setting neutrinet version`
-  - update the app with the latest version from master: `yunohost app upgrade neutrinet -u https://github.com/Neutrinet/neutrinet_ynh`
-  - check the app has been updated: `yunohost app setting neutrinet version`
-  - set the app to a previous version if you want to re-test the update: `yunohost app setting neutrinet version -v "0.2.2"`
+* Edit the [manifest](manifest.json) file to bump the version
+* Edit the [upgrade](scripts/upgrade) script with the needed upgrades for previous installations
+* Test the updated version both for new installs and upgrades and make sure the other scripts ([backup](scripts/backup), [remove](scripts/remove) and [upgrade](scripts/upgrade)) also still work
+* In the [apps.json](https://neutrinet.be/apps.json) file, update the `revision` with the current `sha` on the `master` branch of the package, update the `lastUpdate` field, if you added things to the manifest file, you can add them ass well 
+
