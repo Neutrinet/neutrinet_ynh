@@ -27,7 +27,7 @@ renew_cert_revision="0.3.0"
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_virtualenv="$renew_cert_path/ve"
 renew_cert_python="$renew_cert_virtualenv/bin/python3"
-renew_cert_cron_script=$renew_cert_path/renew_cert_cron.sh
+renew_cert_cron_script="renew_cert_cron.sh"
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
