@@ -120,7 +120,7 @@ if [[ ! -e $renew_cert_path ]]; then
   git clone $renew_cert_repo $renew_cert_path
 fi
 
-git -C $renew_cert_path checkout $renew_cert_revision
+git -C $renew_cert_path checkout $renew_cert_version
 
 # We wrap the python3 script that actually renew the VPN certificate
 # This wrapper will be used as a daily cron task
