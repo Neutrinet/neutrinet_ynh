@@ -60,9 +60,7 @@ if [[ -z $app_user ]]; then
   ynh_app_setting_set $app app_user $app_user
 fi
 
-if ! ynh_system_user_exists -u=$app_user; then
-  ynh_system_user_create -u=$app_user -h=$www_path
-fi
+ynh_system_user_create --username $app_user --home_dir $www_path
 
 if [[ -z $opt_path ]]; then
   opt_path=/opt/$app
