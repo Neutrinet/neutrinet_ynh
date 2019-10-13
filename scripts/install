@@ -94,7 +94,7 @@ sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
 
 cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
-nginx -t
+nginx -t > /dev/null
 service nginx reload
 
 #=================================================

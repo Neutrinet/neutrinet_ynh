@@ -13,7 +13,7 @@
         "url": "https://gitlab.com/Spctrl"
     },
     "requirements": {
-        "yunohost": ">= 3.4.2"
+        "yunohost": ">= 3.2.0"
     },
     "multi_instance": "false",
     "services": [
