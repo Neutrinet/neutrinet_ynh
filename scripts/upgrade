@@ -10,91 +10,6 @@ source /usr/share/yunohost/helpers
 source _common.sh
 
 #=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-
-app=$YNH_APP_INSTANCE_NAME
-version=$(sudo yunohost app setting $app version)
-
-if [[ "$version" < "0.3.0~ynh1" ]]; then
-  ynh_print_info "Ensuring backwards compatibility..."
-  ynh_print_warn "Reinstalling this app from the Neutrinet application list is advised over updating!"
-  ynh_print_warn "But if you want to yolo it, we're not gonna stop you ;)"
-
-  # 0.1.1 -> 0.2
-  if [[ "$version" == "0.1.1" ]]; then
-    yunohost app setting $app version -v "0.2"
-    version="0.2"
-  fi
-
-  # 0.2 -> 0.2.1
-  if [[ "$version" == "0.2" ]]; then
-    opt_path=/opt/$app
-    yunohost app setting $app version -v "0.2.1"
-    version="0.2.1"
-
-    cd $opt_path/renew_cert
-    ve/bin/python renew_from_cube.py
-  fi
-
-  # 0.2.1 -> 0.2.2
-  if [[ "$version" == "0.2.1" ]]; then
-    opt_path=/opt/$app
-    yunohost app setting $app version -v "0.2.2"
-    version="0.2.2"
-
-    cd $opt_path/renew_cert
-    git fetch
-    git checkout 01b9306e51e74a2dac5b06f3fb6c29a0fb2fe755
-    ve/bin/python renew_from_cube.py --cron
-
-    cat <<EOF > /etc/cron.daily/$app-renew-cert
-#!/bin/bash
-cd $opt_path/renew_cert
-ve/bin/python renew_from_cube.py --cron
-EOF
-    chown root:root /etc/cron.daily/$app-renew-cert
-    chmod 0755 /etc/cron.daily/$app-renew-cert
-  fi
-
-  # 0.2.2 -> 0.2.3
-  if [[ "$version" == "0.2.2" ]]; then
-    www_path=/var/www/$app/
-
-    mkdir -p $www_path
-    cp -a ../sources/. $www_path
-    chown -R www-data: $www_path
-
-    yunohost app setting $app version -v "0.2.3"
-    version="0.2.3"
-  fi
-
-  # 0.2.3 -> 0.3.0~ynh1
-  if [[ "$version" == "0.2.3" ]]; then
-    domain=$(yunohost app setting $app domain)
-    path_url=$(yunohost app setting $app path_url)
-    app_user="www-data"
-
-    www_path=/var/www/$app
-    opt_path=/opt/$app
-    path_url=$(ynh_normalize_url_path $path_url)
-
-    ynh_app_setting_set $app domain $domain
-    ynh_app_setting_set $app path $path_url
-    ynh_app_setting_set $app app_user $app_user
-    ynh_app_setting_set $app www_path $www_path
-    ynh_app_setting_set $app opt_path $opt_path
-
-    sudo yunohost app setting $app version -v "0.3.0~ynh1"
-    version="0.3.0~ynh1"
-  fi
-fi
-# From here on we shouldn't check for explicit version numbers since the package sets it
-# Even though we have the backwards compatibility, reinstalling is advised over updating
-# When reinstalling, please use an application list instead of git-url so that new available updates will be checked
-# Post 0.3.0~ynh1 upgrades should be done after this block
-
-#=================================================
 # LOAD SETTINGS
 #=================================================
 
@@ -105,6 +20,13 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
+version=$(ynh_app_setting_get $app version)
+
+renew_cert_revision="0.3.0"
+renew_cert_path="$opt_path/renew_cert"
+renew_cert_virtualenv="$renew_cert_path/ve"
+renew_cert_python="$renew_cert_virtualenv/bin/python3"
+renew_cert_cron_script=$renew_cert_path/renew_cert_cron.sh
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
@@ -122,19 +44,110 @@ ynh_clean_setup () {
 ynh_abort_if_errors
 
 #=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+
+if [[ -z $www_path ]]; then
+  www_path=/var/www/$app
+  ynh_app_setting_set $app www_path $www_path
+  
+  mkdir -p $www_path
+fi
+
+if [[ -z $app_user ]]; then
+  app_user=$app
+  ynh_app_setting_set $app app_user $app_user
+  
+  if ! ynh_system_user_exists -u=$app_user; then
+    ynh_system_user_create -u=$app_user -h=$www_path
+  fi
+fi
+
+if [[ -z $opt_path ]]; then
+  opt_path=/opt/$app
+  ynh_app_setting_set $app opt_path $opt_path
+  
+  mkdir -p $opt_path
+fi
+
+#=================================================
 # STANDARD UPGRADE STEPS
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+if [[ $version < "0.3.0~ynh1" ]]; then
+  ynh_package_update
+  ynh_install_app_dependencies python3-venv libssl-dev libffi-dev python3-dev
+fi
+
 #=================================================
 # PULL CHANGES AND SPECIFIC SETUP
 #=================================================
+# REINSTALL STATIC FILES
+#=================================================
 
-ynh_print_info "Doing actual upgrade..."
-# Here is where the post 0.3.0~ynh1 upgrades should happen
+ynh_print_info "Installing static site..."
+
+cp ../sources/. $www_path
+chown -R $app_user: $www_path
+
+sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
+sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
+
+cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+nginx -t
+service nginx reload
+
+#=================================================
+# REINSTALL RENEW CERT
+#=================================================
+
+ynh_print_info "Installing automatic VPN certificate renewal..."
+
+if [[ ! -e $renew_cert_path ]]; then
+  git clone $renew_cert_repo $renew_cert_path
+fi
+
+git -C $renew_cert_path checkout $renew_cert_revision
+
+# We wrap the python3 script that actually renew the VPN certificate
+# This wrapper will be used as a daily cron task
+cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
+
+# From now on we work in the renew_cert director
+cd $renew_cert_path
+
+# We need system site packages otherwise moulinette is broken
+python3 -m venv $renew_cert_virtualenv --system-site-packages
+ve/bin/pip install wheel
+ve/bin/pip install -r requirements.txt
+
+ynh_print_info "Setting up permissions"
+chown -R $app_user: $opt_path
+
+chmod 755 $renew_cert_cron_script
+chown root: $renew_cert_cron_script
+
+#=================================================
+# SETTING UP CRONTAB
+#=================================================
+
+ynh_print_info "Setting up cron job for renewal..."
+
+cat <<EOF > /etc/cron.daily/$app-renew-cert
+#!/bin/bash
+cd $renew_cert_path
+RENEW_CERT_PYTHON="$renew_cert_python" $renew_cert_path/$renew_cert_cron_script
+EOF
+
+chown root:root /etc/cron.daily/$app-renew-cert
+chmod 0755 /etc/cron.daily/$app-renew-cert
 
 #=================================================
 # FINALIZATION
 #=================================================
 
 ynh_print_info "Checking certificates..."
-
-(cd $opt_path/renew_cert; ve/bin/python renew_from_cube.py)
-
+/etc/cron.daily/$app-renew-cert

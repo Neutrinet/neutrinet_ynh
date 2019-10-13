@@ -77,8 +77,8 @@ ynh_install_app_dependencies git python3-venv libssl-dev libffi-dev python3-dev
 # CREATE DEDICATED USER
 #=================================================
 
-mkdir --parents $www_path
-useradd $app_user --home-dir=$www_path
+mkdir -p $www_path
+ynh_system_user_create -u=$app_user -h=$www_path
 
 #=================================================
 # INSTALL STATIC FILE
@@ -94,6 +94,7 @@ sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
 
 cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
+nginx -t
 service nginx reload
 
 #=================================================
@@ -101,7 +102,7 @@ service nginx reload
 #=================================================
 
 renew_cert_repo="https://github.com/neutrinet/renew_cert"
-renew_cert_revision="b3c49c23d2ad3107a52d845a8ac12476b57be33e"
+renew_cert_revision="0.3.0"
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_virtualenv="$renew_cert_path/ve"
 renew_cert_python="$renew_cert_virtualenv/bin/python3"
