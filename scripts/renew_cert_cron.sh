@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source /usr/share/yunohost/helpers
-
 set -e
 
 OPENVPN_CONF_DIR="/etc/openvpn"
@@ -35,7 +33,8 @@ elif [[ -f $OPENVPN_AUTH_FILE ]]
 then
   credentials_file=$OPENVPN_AUTH_FILE
 else
-  ynh_die "Cannot find credentials for Neutrinet VPN since neither ${OPENVPN_CREDENTIALS_FILE} nor ${OPENVPN_AUTH_FILE} exists."
+  >&2 echo "ERROR: Cannot find credentials for Neutrinet VPN since neither ${OPENVPN_CREDENTIALS_FILE} nor ${OPENVPN_AUTH_FILE} exists."
+  exit 1
 fi
 
 login=$(head -n 1 $credentials_file)
@@ -48,45 +47,45 @@ $RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT $login -p $password -c $OPENVPN_USER_CERT 
 
 if [[ ! -d $renew_dir || ! -f $renew_dir/ca.crt || ! -f $renew_dir/client.crt || ! -f $renew_dir/client.key ]]
 then
-  ynh_print_info "Cleaning $renew_dir directory"
-  rm -rf $renew_dir
+  echo "Cleaning $renew_dir directory."
+  rm -rf "$renew_dir"
   exit 0
 fi
 
-ynh_print_info "Saving old OpenVPN config"
+echo "Saving old OpenVPN config"
 cp -r $OPENVPN_CONF_DIR{,.old_${run_date}}
 
-ynh_print_info "Copying new OpenVPN config"
+echo "Copying new OpenVPN config"
 cp "$NEUTRINET_CONF_TEMPLATE" "$OPENVPN_CONF_TEMPLATE"
 
-ynh_print_info "Copying new certificates"
+echo "Copying new certificates"
 cp "$renew_dir/ca.crt" "$OPENVPN_SERVER_CERT"
 cp "$renew_dir/client.crt" "$OPENVPN_USER_CERT"
 cp "$renew_dir/client.key" "$OPENVPN_USER_KEY"
 
-ynh_print_info "Adding user credentials"
+echo "Adding user credentials"
 echo -e "$login\n$password" > $OPENVPN_CREDENTIALS_FILE
 
-ynh_print_info "Updating VPNClient config"
-ynh_app_setting_set vpnclient server_name "vpn.neutrinet.be"
-ynh_app_setting_set vpnclient server_port "1195"
-ynh_app_setting_set vpnclient server_proto "udp"
-ynh_app_setting_set vpnclient service_enabled "1"
-ynh_app_setting_set vpnclient login_user "$login"
-ynh_app_setting_set vpnclient login_passphrase "$password"
+echo "Updating VPNClient config"
+yunohost app setting vpnclient server_name -v "vpn.neutrinet.be"
+yunohost app setting vpnclient server_port -v "1195"
+yunohost app setting vpnclient server_proto -v "udp"
+yunohost app setting vpnclient service_enabled -v "1"
+yunohost app setting vpnclient login_user -v "$login"
+yunohost app setting vpnclient login_passphrase -v "$password"
 
-ynh_print_warn "Critical part 1: reloading VPNClient"
+echo "Critical part 1: reloading VPNClient"
 if ! ynh-vpnclient restart && ynh-vpnclient status
 then
-  ynh_print_err "Failed to restart VPNClient"
+  >&2 echo "ERROR: Failed to restart VPNClient"
   tail -n 200 "$OPENVPN_CLIENT_LOGS"
   exit 1
 fi
 
-ynh_print_warn "Critical part 2: restarting OpenVPN"
+echo "Critical part 2: restarting OpenVPN"
 if ! service openvpn restart
 then
-  ynh_print_err "Failed to restart OpenVPN"
+  >&2 echo "ERROR: Failed to restart OpenVPN"
   journalctl -u openvpn -n 200 --no-pager
   exit 1
 fi
@@ -98,12 +97,12 @@ then
   exit 0
 fi
 
-ynh_print_info "Few, we're done, let's wait 2min to be sure the VPN is running, then restart hotspot"
+echo "Few, we're done, let's wait 2min to be sure the VPN is running, then restart hotspot"
 sleep 120
 
-ynh_print_info "Restarting hotspot"
+echo "Restarting hotspot"
 if ! ynh-hotspot restart && ynh-hotspot status
 then
-  ynh_print_warn "Failed to restart hotspot"
-  ynh_print_warn "Since it's not a critical part, let's continue"
+  >&2 echo "ERROR: Failed to restart hotspot"
+  echo "Since it's not a critical part, let's continue"
 fi
