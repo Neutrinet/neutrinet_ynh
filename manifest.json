@@ -31,7 +31,7 @@
                 "example": "domain.org"
             },
             {
-                "name": "path",
+                "name": "path_url",
                 "type": "path",
                 "ask": {
                     "en": "Choose a path for Neutrinet application",
