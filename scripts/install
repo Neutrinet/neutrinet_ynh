@@ -20,7 +20,7 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
+path_url=$YNH_APP_ARG_PATH_URL
 app=$YNH_APP_INSTANCE_NAME
 app_user=$app
 
