@@ -37,8 +37,8 @@ else
   exit 1
 fi
 
-login=$(head -n 1 $credentials_file)
-password=$(tail -n 1 $credentials_file)
+login=$(head -n 1 "$credentials_file")
+password=$(tail -n 1 "$credentials_file")
 
 run_date=$(date +'%Y-%m-%d_%H:%M:%S')
 renew_dir="certs_$run_date"
@@ -64,7 +64,7 @@ cp "$renew_dir/client.crt" "$OPENVPN_USER_CERT"
 cp "$renew_dir/client.key" "$OPENVPN_USER_KEY"
 
 echo "Adding user credentials"
-echo -e "$login\n$password" > $OPENVPN_CREDENTIALS_FILE
+echo -e "$login\n$password" > "$OPENVPN_CREDENTIALS_FILE"
 
 echo "Updating VPNClient config"
 yunohost app setting vpnclient server_name -v "vpn.neutrinet.be"

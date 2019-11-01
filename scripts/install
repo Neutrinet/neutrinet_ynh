@@ -95,7 +95,7 @@ sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
 
 cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
-nginx -t > /dev/null
+nginx -t > /dev/null 2>&1
 service nginx reload
 
 #=================================================
@@ -129,7 +129,7 @@ ve/bin/pip install -r requirements.txt
 ynh_print_info "Setting up permissions"
 chown -R $app_user: $opt_path
 
-chmod 755 $renew_cert_cron_script
+chmod 0755 $renew_cert_cron_script
 chown root: $renew_cert_cron_script
 
 #=================================================
