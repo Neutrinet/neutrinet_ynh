@@ -76,10 +76,10 @@ ynh_install_app_dependencies git python3-venv libssl-dev libffi-dev python3-dev
 # CREATE DEDICATED USER
 #=================================================
 
-ynh_print_info "Creating user's app…"
+ynh_print_info "Creating app's user…"
 
 mkdir -p $www_path
-ynh_system_user_create -u=$app_user -h=$www_path
+ynh_system_user_create $app_user $www_path
 
 #=================================================
 # INSTALL STATIC FILE
