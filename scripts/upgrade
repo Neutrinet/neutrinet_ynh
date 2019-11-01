@@ -52,6 +52,17 @@ if [[ -z $app_user ]]; then
   ynh_app_setting_set $app app_user $app_user
 fi
 
+if [[ -z $path_url ]]; then
+  path_url=$(ynh_app_setting_get $app path)
+
+  if [[ -z $path_url ]]; then
+    ynh_die "Missing path url!"
+  else
+    ynh_app_setting_set $app path_url $path_url
+    ynh_app_setting_delete $app path
+  fi
+fi
+
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
