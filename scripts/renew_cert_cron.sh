@@ -43,7 +43,7 @@ password=$(tail -n 1 $credentials_file)
 run_date=$(date +'%Y-%m-%d_%H:%M:%S')
 renew_dir="certs_$run_date"
 
-$RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT $login -p $password -c $OPENVPN_USER_CERT -d "$renew_dir" -v
+$RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir" -v
 
 if [[ ! -d $renew_dir || ! -f $renew_dir/ca.crt || ! -f $renew_dir/client.crt || ! -f $renew_dir/client.key ]]
 then
