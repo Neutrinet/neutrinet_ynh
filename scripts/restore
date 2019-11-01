@@ -69,7 +69,7 @@ ynh_restore_file "$www_path"
 ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
 chown -R $app_user: "$www_path"
 
-nginx -t > /dev/null 2>&1
+nginx -tq
 service nginx reload
 
 #=================================================
