@@ -38,6 +38,6 @@ ynh_print_info "Backing up..."
 ynh_backup "$www_path"
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-ynh_backup $opt_path
+ynh_backup "$opt_path"
 ynh_backup "/etc/cron.daily/$app-renew-cert"
 
