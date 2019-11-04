@@ -13,7 +13,7 @@
         "url": "https://gitlab.com/Spctrl"
     },
     "requirements": {
-        "yunohost": ">= 3.4.2"
+        "yunohost": ">= 3.2.0"
     },
     "multi_instance": "false",
     "services": [
@@ -31,7 +31,7 @@
                 "example": "domain.org"
             },
             {
-                "name": "path",
+                "name": "path_url",
                 "type": "path",
                 "ask": {
                     "en": "Choose a path for Neutrinet application",

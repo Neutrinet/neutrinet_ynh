@@ -28,13 +28,15 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 ynh_print_info "Removing static site..."
 
 rm -rf $www_path
-rm -f /etc/nginx/conf.d/$domain.d/neutrinet.conf
+rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+
+nginx -t > /dev/null
 service nginx reload
 
 ynh_print_info "Removing automatic vpn certificate renewal..."
 
 rm -rf $opt_path
-rm -rf /etc/cron.daily/neutrinet-renew-cert
+rm -rf /etc/cron.daily/$app-renew-cert
 
 #=================================================
 # REMOVE DEPENDENCIES
