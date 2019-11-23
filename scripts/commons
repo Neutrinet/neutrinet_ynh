@@ -1,9 +1,0 @@
-RENEW_CERT_PATH=/opt/neutrinet/renew_cert
-
-get_out_of_testing() {
-    set -e
-
-    if [ -e /etc/apt/sources.list.d/yunohost.list ]; then
-        sudo sed -ri 's#^(deb http://repo\.yunohost\.org/debian[/]? jessie) (stable )?testing#\1 stable#g' /etc/apt/sources.list.d/yunohost.list
-    fi
-}
