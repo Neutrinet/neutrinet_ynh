@@ -1,101 +1,156 @@
-set -e
+#!/bin/bash
 
-source ./commons
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Retrieve arguments
-domain=$1
-path=$2
+source /usr/share/yunohost/helpers
+source _common.sh
 
-path=${path%/}
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain$path -a neutrinet
-if [[ ! $? -eq 0 ]]; then
-    exit 1
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
+domain=$YNH_APP_ARG_DOMAIN
+path_url=$YNH_APP_ARG_PATH_URL
+app=$YNH_APP_INSTANCE_NAME
+app_user=$app
+
+#==================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#==================================================
+
+www_path=/var/www/$app
+if [[ -e $www_path ]]
+then
+  ynh_die "The path $www_path already contains a folder"
 fi
 
-install_static_file() {
-    set -e
-
-    final_path=/var/www/neutrinet/
-    sudo mkdir -p $final_path
-    sudo cp -a ../sources/. $final_path
-
-    sudo chown -R www-data: $final_path
-
-    if [[ "$path" == "" ]]; then
-      sed -i "s@PATHTOCHANGE@/@g" ../conf/nginx.conf
-    else
-      sed -i "s@PATHTOCHANGE@$path@g" ../conf/nginx.conf
-    fi
-
-    sed -i "s@ALIASTOCHANGE@$final_path@g" ../conf/nginx.conf
-
-    sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/neutrinet.conf
-
-    sudo service nginx reload
-}
-
-install_renew_cert() {
-    set -e
-
-    install_dir=$(pwd)
-
-    if [ -e $RENEW_CERT_PATH ]; then
-        sudo rm -rf $RENEW_CERT_PATH
-    fi
-
-    sudo apt-get update
-    sudo apt-get install -y python-virtualenv
-
-    sudo git clone https://github.com/neutrinet/renew_cert $RENEW_CERT_PATH
-
-    cd $RENEW_CERT_PATH
-
-    sudo git checkout ccc5b6b58010bb4166c2ae1a72df340395827f99 || echo ""
-
-    # I need system site packages otherwise moulinette is broken
-    sudo virtualenv ve --system-site-packages
-    sudo ve/bin/pip install -r requirements.txt
-
-    cd $install_dir
-}
-
-renew_cert() {
-    set -e
-
-    install_dir=$(pwd)
-
-    cd $RENEW_CERT_PATH
-    sudo ve/bin/python renew_from_cube.py
-
-    cd $install_dir
-}
-
-install_neutrinet_apps_list() {
-    if ! sudo yunohost app listlists | grep -q "neutrinet:"; then
-      sudo yunohost app fetchlist -n neutrinet -u https://neutrinet.be/apps.json
-    fi
-}
-
-install_labriqueinternet_apps_list() {
-    if ! sudo yunohost app listlists | grep -q "labriqueinternet:"; then
-      sudo yunohost app fetchlist -n labriqueinternet -u https://labriqueinter.net/apps/labriqueinternet.json
-    fi
-}
-
-sudo yunohost app setting neutrinet version -v "0.2"
-
-install_neutrinet_apps_list
-install_labriqueinternet_apps_list
-
-get_out_of_testing
-
-install_static_file
-
-install_renew_cert
-
-# vpn is not running, let's assume for now that this mean that the vpn is broken
-if [ ! "$(grep '^port 1195' /etc/openvpn/client.conf)" ]; then
-    renew_cert
+opt_path=/opt/$app
+if [[ -e $opt_path ]]
+then
+  ynh_die "The path $opt_path already contains a folder"
 fi
+
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path $path_url)
+
+# Check web path availability
+if ! ynh_webpath_available $domain $path_url
+then
+  ynh_die "$domain$path_url is not available"
+fi
+
+# Register (book) web path
+ynh_webpath_register $app $domain $path_url
+
+#=================================================
+# STORE SETTINGS
+#=================================================
+
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app path_url $path_url
+ynh_app_setting_set $app app_user $app_user
+ynh_app_setting_set $app www_path $www_path
+ynh_app_setting_set $app opt_path $opt_path
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+ynh_print_info "Installing dependencies…"
+
+ynh_install_app_dependencies git python3-venv libssl-dev libffi-dev python3-dev
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+ynh_print_info "Creating app's user…"
+
+mkdir -p $www_path
+ynh_system_user_create $app_user $www_path
+
+#=================================================
+# INSTALL STATIC FILE
+#=================================================
+
+ynh_print_info "Installing static site…"
+
+cp -a ../sources/. $www_path
+chown -R $app_user: $www_path
+
+sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
+sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
+
+cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+nginx -tq
+service nginx reload
+
+#=================================================
+# INSTALL RENEW CERT
+#=================================================
+
+renew_cert_repo="https://github.com/neutrinet/renew_cert"
+renew_cert_version=$(jq .version ../manifest.json -r -e | cut -d '~' -f 1)
+renew_cert_path="$opt_path/renew_cert"
+renew_cert_virtualenv="$renew_cert_path/ve"
+renew_cert_python="$renew_cert_virtualenv/bin/python3"
+renew_cert_cron_script="renew_cert_cron.sh"
+
+ynh_print_info "Installing automatic VPN certificate renewal…"
+
+git clone $renew_cert_repo $renew_cert_path
+git -C $renew_cert_path checkout $renew_cert_version
+
+# We wrap the python3 script that actually renew the VPN certificate
+# This wrapper will be used as a daily cron task
+cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
+
+# From now on we work in the renew_cert directory
+cd $renew_cert_path
+
+# We need system site packages otherwise moulinette is broken
+python3 -m venv $renew_cert_virtualenv --system-site-packages
+ve/bin/pip install wheel
+ve/bin/pip install -r requirements.txt
+
+ynh_print_info "Setting up permissions"
+chown -R $app_user: $opt_path
+
+chmod 0755 $renew_cert_cron_script
+chown root: $renew_cert_cron_script
+
+#=================================================
+# SETTING UP CRONTAB
+#=================================================
+
+ynh_print_info "Setting up cron job for certificate renewal…"
+
+cat <<EOF > /etc/cron.daily/$app-renew-cert
+#!/bin/bash
+cd $renew_cert_path
+RENEW_CERT_PYTHON="$renew_cert_python" $renew_cert_path/$renew_cert_cron_script
+EOF
+
+chown root:root /etc/cron.daily/$app-renew-cert
+chmod 0755 /etc/cron.daily/$app-renew-cert
+
+#=================================================
+# FINALIZATION
+#=================================================
+
+ynh_print_info "Checking certificates…"
+
+/etc/cron.daily/$app-renew-cert
