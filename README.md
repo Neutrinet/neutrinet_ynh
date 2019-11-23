@@ -5,17 +5,6 @@ The neutrinet application is for Neutrinet members that have an Internet Cube co
 * Adds a webpage with genral information about Neutrinet
 
 # Installation
-## From the webinterface
-
-First make sure you have the neutrinet_app list
-1. Go to the admin interface on your cube
-2. Click *Applications* > *Install* > At the bottom click *Manage application lists* > Check in the Application list if you have *neutrinet*
-3. If you don't have it > under Custom applications lists you give *neutrinet* under Name. Under URL you give *https://neutrinet.be/apps.json* > Add
-
-The we can install the application
-1. Click *Applications* at the top of the page
-2. click *Install* > select *All apps* > search for *neutrinet*> click *Install* > Fill in the form (or just keep the defaults) and press Install just like you would install any app from the webinterface
-
 ## From the CLI
 
 First check if you have a list, probably named *neutrinet*, with *https://neutrinet.be/apps.json* as url.
@@ -24,13 +13,18 @@ First check if you have a list, probably named *neutrinet*, with *https://neutri
 
 If you don't have the list yet, you can add it using
 
-`yunohost app fetchlist --name neutrinet -u https://neutrinet.be/apps.json`
+`yunohost app fetchlist --name neutrinet --url https://neutrinet.be/apps.json`
 
 Once you have the list, you can install the app using
 
 `yunohost app install neutrinet --debug`
 
 # For contributers
+## Contributing
+* Bugs, feature requests and other issues can be logged on the issue tracker at https://git.domainepublic.net/Neutrinet/neutrinet_ynh/issues
+* Merge requests should be submitted at https://git.domainepublic.net/Neutrinet/neutrinet_ynh
+* Merge requests should be done to the `develop` branch
+
 ## Publish a new version of the app
 
 * Edit the [manifest](manifest.json) file to bump the version
