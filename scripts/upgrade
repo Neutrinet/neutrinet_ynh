@@ -143,7 +143,7 @@ cd $renew_cert_path
 
 if [[ ! -e $renew_cert_python \
     || $($renew_cert_python --version 2>&1 | grep -q "Python 2") ]]; then
-  rm -f $renew_cert_virtualenv
+  rm -rf $renew_cert_virtualenv
   # We need system site packages otherwise moulinette is broken
   python3 -m venv $renew_cert_virtualenv --system-site-packages
 fi
