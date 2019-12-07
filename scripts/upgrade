@@ -128,6 +128,8 @@ renew_cert_cron_script="renew_cert_cron.sh"
 
 if [[ ! -e $renew_cert_path ]]; then
   git clone $renew_cert_repo $renew_cert_path
+else
+  git -C $renew_cert_path fetch -t
 fi
 
 git -C $renew_cert_path checkout $renew_cert_version
