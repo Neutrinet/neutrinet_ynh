@@ -123,7 +123,7 @@ renew_cert_repo="https://github.com/neutrinet/renew_cert"
 renew_cert_version=$(jq .version ../manifest.json -r -e | cut -d '~' -f 1)
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_virtualenv="$renew_cert_path/ve"
-renew_cert_python="$renew_cert_virtualenv/bin/python3"
+renew_cert_python="$renew_cert_virtualenv/bin/python"
 renew_cert_cron_script="renew_cert_cron.sh"
 
 if [[ ! -e $renew_cert_path ]]; then
@@ -141,7 +141,9 @@ cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
 # From now on we work in the renew_cert directory
 cd $renew_cert_path
 
-if [[ ! -e $renew_cert_virtualenv || $version < "0.3.0~ynh1" ]]; then
+if [[ ! -e $renew_cert_python \
+    || $($renew_cert_python --version 2>&1 | grep -q "Python 2") ]]; then
+  rm -f $renew_cert_virtualenv
   # We need system site packages otherwise moulinette is broken
   python3 -m venv $renew_cert_virtualenv --system-site-packages
 fi
