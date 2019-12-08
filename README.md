@@ -40,18 +40,18 @@ yunohost app install neutrinet --debug
 
 You can manually run the cron job that attempts to renew the certificates:
 ```shell
-/etc/cron.daily/neutrinet-renew-cert
+sudo /etc/cron.daily/neutrinet-renew-cert
 ```
 
 This actually runs the script in `/opt/neutrinet/renew_cert/`:
 ```shell
 cd /opt/neutrinet/renew_cert
-RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh
+sudo RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh
 ```
 
 You can increase the verbosity with the option `-v`:
 ```shell
-RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh -v
+sudo RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh -v
 ```
 
 # For contributers
