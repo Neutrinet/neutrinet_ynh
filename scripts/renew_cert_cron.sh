@@ -51,8 +51,13 @@ password=$(tail -n 1 "$credentials_file")
 run_date=$(date +'%Y-%m-%d_%H:%M:%S')
 renew_dir="certs_$run_date"
 
-# Keep the logs for later. We will print them only if the certificates are being renewed.
-renew_cert_logs=$($RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir")
+if $DEBUG
+then
+  $RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir" -v
+else
+  # Keep the logs for later. We will print them only if the certificates are being renewed.
+  renew_cert_logs=$($RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir")
+fi
 
 if [[ ! -d $renew_dir || ! -f $renew_dir/ca.crt || ! -f $renew_dir/client.crt || ! -f $renew_dir/client.key ]]
 then
@@ -64,7 +69,10 @@ then
   exit 0
 fi
 
-echo "$renew_cert_logs"
+if [[ -n $renew_cert_logs ]]
+then
+  echo "$renew_cert_logs"
+fi
 
 echo "Saving old OpenVPN config"
 cp -r $OPENVPN_CONF_DIR{,.old_${run_date}}
