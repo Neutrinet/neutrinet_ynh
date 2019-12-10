@@ -42,6 +42,8 @@ fi
 
 # Normalize the url path syntax
 path_url=$(ynh_normalize_url_path $path_url)
+# Trim trailing slashes
+path_url=$(sed 's@*/$@@' <<< $path_url)
 
 # Check web path availability
 if ! ynh_webpath_available $domain $path_url
