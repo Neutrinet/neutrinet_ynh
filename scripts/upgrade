@@ -147,8 +147,7 @@ if [[ ! -e $renew_cert_python \
   # We need system site packages otherwise moulinette is broken
   virtualenv -p python3 $renew_cert_virtualenv --system-site-packages
 fi
-$renew_cert_virtualenv/bin/pip install wheel
-$renew_cert_virtualenv/bin/pip install -r requirements.txt
+$renew_cert_virtualenv/bin/pip install --isolated -r requirements.txt
 
 ynh_print_info "Setting up permissions"
 chown -R $app_user: $opt_path
