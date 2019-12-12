@@ -70,7 +70,7 @@ ynh_app_setting_set $app opt_path $opt_path
 
 ynh_print_info "Installing dependencies…"
 
-ynh_install_app_dependencies git python3-venv libssl-dev libffi-dev python3-dev
+ynh_install_app_dependencies git virtualenv python3-virtualenv libssl-dev libffi-dev python3-dev
 
 #=================================================
 # CREATE DEDICATED USER
@@ -122,9 +122,8 @@ cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
 cd $renew_cert_path
 
 # We need system site packages otherwise moulinette is broken
-python3 -m venv $renew_cert_virtualenv --system-site-packages
-ve/bin/pip install wheel
-ve/bin/pip install -r requirements.txt
+virtualenv -p python3 $renew_cert_virtualenv --system-site-packages
+$renew_cert_virtualenv/bin/pip install -r requirements.txt
 
 ynh_print_info "Setting up permissions"
 chown -R $app_user: $opt_path

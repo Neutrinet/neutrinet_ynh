@@ -50,7 +50,7 @@ fi
 
 ynh_print_info "Installing dependencies…"
 
-ynh_install_app_dependencies git python3-venv libssl-dev libffi-dev python3-dev
+ynh_install_app_dependencies git virtualenv python3-virtualenv libssl-dev libffi-dev python3-dev
 
 #=================================================
 # CREATE DEDICATED USER

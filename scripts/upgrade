@@ -91,7 +91,7 @@ if [[ $version < "0.3.0~ynh1" ]]; then
   ynh_print_info "Upgrading dependencies..."
 
   ynh_package_update
-  ynh_install_app_dependencies python3-venv libssl-dev libffi-dev python3-dev
+  ynh_install_app_dependencies virtualenv python3-virtualenv libssl-dev libffi-dev python3-dev
 fi
 
 #=================================================
@@ -145,10 +145,10 @@ if [[ ! -e $renew_cert_python \
     || $($renew_cert_python --version 2>&1 | grep -q "Python 2") ]]; then
   rm -rf $renew_cert_virtualenv
   # We need system site packages otherwise moulinette is broken
-  python3 -m venv $renew_cert_virtualenv --system-site-packages
+  virtualenv -p python3 $renew_cert_virtualenv --system-site-packages
 fi
-ve/bin/pip install wheel
-ve/bin/pip install -r requirements.txt
+$renew_cert_virtualenv/bin/pip install wheel
+$renew_cert_virtualenv/bin/pip install -r requirements.txt
 
 ynh_print_info "Setting up permissions"
 chown -R $app_user: $opt_path
