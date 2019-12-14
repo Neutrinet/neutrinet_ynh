@@ -9,15 +9,39 @@ The neutrinet application is for Neutrinet members that have an Internet Cube co
 
 First check if you have a list, probably named *neutrinet*, with *https://neutrinet.be/apps.json* as url.
 
-`yunohost app listlists`
+```shell
+yunohost app listlists
+```
 
 If you don't have the list yet, you can add it using
 
-`yunohost app fetchlist --name neutrinet --url https://neutrinet.be/apps.json`
+```shell
+yunohost app fetchlist --name neutrinet -u https://neutrinet.be/apps.json
+```
 
 Once you have the list, you can install the app using
 
-`yunohost app install neutrinet --debug`
+```shell
+yunohost app install neutrinet --debug
+```
+
+## Debugging
+
+You can manually run the cron job that attempts to renew the certificates:
+```shell
+sudo /etc/cron.daily/neutrinet-renew-cert
+```
+
+This actually runs the script in `/opt/neutrinet/renew_cert/`:
+```shell
+cd /opt/neutrinet/renew_cert
+sudo RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh
+```
+
+You can increase the verbosity with the option `-v`:
+```shell
+sudo RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh -v
+```
 
 # For contributers
 ## Contributing
