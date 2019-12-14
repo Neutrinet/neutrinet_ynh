@@ -16,6 +16,7 @@ source _common.sh
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
+path=$(ynh_app_setting_get $app path)
 path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
@@ -53,14 +54,26 @@ if [[ -z $app_user ]]; then
 fi
 
 if [[ -z $path_url ]]; then
-  path_url=$(ynh_app_setting_get $app path)
+  path_url=$path
 
   if [[ -z $path_url ]]; then
     ynh_die "Missing path url!"
   else
     ynh_app_setting_set $app path_url $path_url
-    ynh_app_setting_delete $app path
   fi
+fi
+
+if [[ $path_url == */ ]]; then
+  # Trim trailing slashes
+  path_url=$(sed 's@/*$@@' <<< $path_url)
+  ynh_app_setting_set $app path_url $path_url
+fi
+
+# path setting is needed by Yunohost
+# when path is empty, Yunohost thinks the app is on the domain root
+if [[ "$path" != "$path_url" ]]; then
+  path=$path_url
+  ynh_app_setting_set $app path $path
 fi
 
 #=================================================
@@ -87,11 +100,14 @@ ynh_abort_if_errors
 if [[ $version < "0.3.0~ynh1" ]]; then
   ynh_app_setting_delete $app version
   ynh_system_user_create --username $app_user --home_dir $www_path
+fi
+
+if [[ $version < "0.3.0~ynh4" ]]; then
+  ynh_print_info "Removing old dependencies..."
+  ynh_remove_app_dependencies virtualenv python3-venv libssl-dev libffi-dev python3-dev
 
   ynh_print_info "Upgrading dependencies..."
-
-  ynh_package_update
-  ynh_install_app_dependencies python3-venv libssl-dev libffi-dev python3-dev
+  ynh_install_app_dependencies python3-openssl python3-requests
 fi
 
 #=================================================
@@ -122,8 +138,6 @@ ynh_print_info "Installing automatic VPN certificate renewal..."
 renew_cert_repo="https://github.com/neutrinet/renew_cert"
 renew_cert_version=$(jq .version ../manifest.json -r -e | cut -d '~' -f 1)
 renew_cert_path="$opt_path/renew_cert"
-renew_cert_virtualenv="$renew_cert_path/ve"
-renew_cert_python="$renew_cert_virtualenv/bin/python"
 renew_cert_cron_script="renew_cert_cron.sh"
 
 if [[ ! -e $renew_cert_path ]]; then
@@ -138,23 +152,11 @@ git -C $renew_cert_path checkout $renew_cert_version
 # This wrapper will be used as a daily cron task
 cp $renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
 
-# From now on we work in the renew_cert directory
-cd $renew_cert_path
-
-if [[ ! -e $renew_cert_python \
-    || $($renew_cert_python --version 2>&1 | grep -q "Python 2") ]]; then
-  rm -rf $renew_cert_virtualenv
-  # We need system site packages otherwise moulinette is broken
-  python3 -m venv $renew_cert_virtualenv --system-site-packages
-fi
-ve/bin/pip install wheel
-ve/bin/pip install -r requirements.txt
-
 ynh_print_info "Setting up permissions"
 chown -R $app_user: $opt_path
 
-chmod 755 $renew_cert_cron_script
-chown root: $renew_cert_cron_script
+chmod 755 $renew_cert_path/$renew_cert_cron_script
+chown root: $renew_cert_path/$renew_cert_cron_script
 
 #=================================================
 # SETTING UP CRONTAB
@@ -165,7 +167,7 @@ ynh_print_info "Setting up cron job for renewal..."
 cat <<EOF > /etc/cron.daily/$app-renew-cert
 #!/bin/bash
 cd $renew_cert_path
-RENEW_CERT_PYTHON="$renew_cert_python" $renew_cert_path/$renew_cert_cron_script
+$renew_cert_path/$renew_cert_cron_script
 EOF
 
 chown root:root /etc/cron.daily/$app-renew-cert
