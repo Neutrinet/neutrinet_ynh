@@ -16,6 +16,7 @@ source _common.sh
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
+path=$(ynh_app_setting_get $app path)
 path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
@@ -53,13 +54,12 @@ if [[ -z $app_user ]]; then
 fi
 
 if [[ -z $path_url ]]; then
-  path_url=$(ynh_app_setting_get $app path)
+  path_url=$path
 
   if [[ -z $path_url ]]; then
     ynh_die "Missing path url!"
   else
     ynh_app_setting_set $app path_url $path_url
-    ynh_app_setting_delete $app path
   fi
 fi
 
@@ -67,6 +67,13 @@ if [[ $path_url == */ ]]; then
   # Trim trailing slashes
   path_url=$(sed 's@/*$@@' <<< $path_url)
   ynh_app_setting_set $app path_url $path_url
+fi
+
+# path setting is needed by Yunohost
+# when path is empty, Yunohost thinks the app is on the domain root
+if [[ "$path" != "$path_url" ]]; then
+  path=$path_url
+  ynh_app_setting_set $app path $path
 fi
 
 #=================================================
