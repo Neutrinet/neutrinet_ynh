@@ -103,17 +103,6 @@ if [[ $version < "0.3.0~ynh4" ]]; then
   ynh_install_app_dependencies python3-openssl python3-requests
 fi
 
-if [[ $version < "0.3.0~ynh4" ]]; then
-  # Check web path availability
-  if ! ynh_webpath_available $domain $path_url
-  then
-    ynh_die "$domain$path_url is not available"
-  fi
-
-  # Register (book) web path
-  ynh_webpath_register $app $domain $path_url
-fi
-
 #=================================================
 # PULL CHANGES AND SPECIFIC SETUP
 #=================================================
