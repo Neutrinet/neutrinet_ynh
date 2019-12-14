@@ -35,12 +35,12 @@ sudo /etc/cron.daily/neutrinet-renew-cert
 This actually runs the script in `/opt/neutrinet/renew_cert/`:
 ```shell
 cd /opt/neutrinet/renew_cert
-sudo RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh
+sudo ./renew_cert_cron.sh
 ```
 
 You can increase the verbosity with the option `-v`:
 ```shell
-sudo RENEW_CERT_PYTHON=ve/bin/python ./renew_cert_cron.sh -v
+sudo ./renew_cert_cron.sh -v
 ```
 
 # For contributers
