@@ -118,6 +118,8 @@ fi
 
 ynh_print_info "Installing static site..."
 
+rm -rf $www_path
+mkdir -p $www_path
 cp -r ../sources/. $www_path
 chown -R $app_user: $www_path
 
