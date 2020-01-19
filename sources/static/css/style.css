@@ -12,6 +12,10 @@
     border-radius: 6px;
 }
 
+.language-menu {
+    text-align: right;
+}
+
 p {
     margin: 0px;
 }
@@ -49,9 +53,8 @@ p {
 
 a {
     color: black;
-    font-weight: 600;
     font-family: arial;
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 .loader {
