@@ -47,12 +47,12 @@ sudo ./renew_cert_cron.sh -v
 ## Contributing
 * Bugs, feature requests and other issues can be logged on the issue tracker at https://git.domainepublic.net/Neutrinet/neutrinet_ynh/issues
 * Merge requests should be submitted at https://git.domainepublic.net/Neutrinet/neutrinet_ynh
-* Merge requests should be done to the `develop` branch
+* Merge requests should be done to the `unstable` branch
 
 ## Publish a new version of the app
 
 * Edit the [manifest](manifest.json) file to bump the version
 * Edit the [upgrade](scripts/upgrade) script with the needed upgrades for previous installations
 * Test the updated version both for new installs and upgrades and make sure the other scripts ([backup](scripts/backup), [remove](scripts/remove) and [upgrade](scripts/upgrade)) also still work
-* In the [apps.json](https://neutrinet.be/apps.json) file you must update the `revision` with the current `sha` on the `master` branch of the package and update the `lastUpdate` field. If you added things to the manifest file, you should add these changes ass well 
+* In the [apps.json](https://neutrinet.be/apps.json) file you must update the `revision` with the current `sha` on the `stable` branch of the package and update the `lastUpdate` field. If you added things to the manifest file, you should add these changes ass well 
 
