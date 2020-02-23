@@ -31,7 +31,7 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
 
-ynh_print_info "Checking for conflicts…"
+ynh_script_progression "Checking for conflicts…"
 
 [[ ! -e $www_path ]] || ynh_die "The path $www_path already contains a folder"
 [[ ! -e $opt_path ]] || ynh_die "The path $opt_path already contains a folder"
@@ -48,7 +48,7 @@ fi
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_print_info "Installing dependencies…"
+ynh_script_progression "Installing dependencies…"
 
 ynh_install_app_dependencies git python3-openssl python3-requests
 
@@ -63,7 +63,7 @@ ynh_system_user_create $app_user "$www_path"
 # RESTORE STATIC FILES
 #=================================================
 
-ynh_print_info "Restoring static site…"
+ynh_script_progression "Restoring static site…"
 
 ynh_restore_file "$www_path"
 ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
@@ -76,7 +76,7 @@ service nginx reload
 # RESTORE RENEW CERT
 #=================================================
 
-ynh_print_info "Restoring automatic VPN certificates renewal…"
+ynh_script_progression "Restoring automatic VPN certificates renewal…"
 
 ynh_restore_file "$opt_path"
 ynh_restore_file "/etc/cron.daily/$app-renew-cert"
@@ -91,7 +91,7 @@ chmod 0755 /etc/cron.daily/$app-renew-cert \
 # FINALIZATION
 #=================================================
 
-ynh_print_info "Checking certificates…"
+ynh_script_progression "Checking certificates…"
 
 /etc/cron.daily/$app-renew-cert
 

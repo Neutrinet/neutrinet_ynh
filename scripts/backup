@@ -33,7 +33,7 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
 
-ynh_print_info "Backing up..."
+ynh_script_progression "Backing up..."
 
 ynh_backup "$www_path"
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
