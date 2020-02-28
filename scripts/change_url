@@ -52,4 +52,4 @@ rm -f /etc/nginx/conf.d/$old_domain.d/$app.conf
 ynh_script_progression "Reloading nginx web server..."
 
 nginx -tq
-yunohost_systemd_action nginx reload
+ynh_systemd_action nginx reload
