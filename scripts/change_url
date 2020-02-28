@@ -38,6 +38,13 @@ path_url=$(ynh_normalize_url_path $path_url)
 path_url=$(sed 's@*/$@@' <<< $path_url)
 
 #=================================================
+# STORE SETTINGS
+#=================================================
+
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app path_url $path_url
+
+#=================================================
 # CHANGE URL IN NGINX CONFIG
 #=================================================
 
@@ -46,8 +53,8 @@ ynh_script_progression "Updating nginx configuration..."
 sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
 sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
 
-cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 rm -f /etc/nginx/conf.d/$old_domain.d/$app.conf
+cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 ynh_script_progression "Reloading nginx web server..."
 
