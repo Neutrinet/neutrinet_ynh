@@ -1,0 +1,55 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source /usr/share/yunohost/helpers
+source _common.sh
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+
+old_domain=$YNH_APP_OLD_DOMAIN
+old_path_url=$YNH_APP_OLD_PATH
+www_path=$(ynh_app_setting_get $app www_path)
+
+domain=$YNH_APP_NEW_DOMAIN
+path_url=$YNH_APP_NEW_PATH
+
+#==================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#==================================================
+
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path $path_url)
+# Trim trailing slashes
+path_url=$(sed 's@*/$@@' <<< $path_url)
+
+#=================================================
+# CHANGE URL IN NGINX CONFIG
+#=================================================
+
+ynh_script_progression "Updating nginx configuration..."
+
+sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
+sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
+
+cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+rm -f /etc/nginx/conf.d/$old_domain.d/$app.conf
+
+ynh_script_progression "Reloading nginx web server..."
+
+nginx -tq
+yunohost_systemd_action nginx reload

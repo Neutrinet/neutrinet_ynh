@@ -70,7 +70,7 @@ ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
 chown -R $app_user: "$www_path"
 
 nginx -tq
-service nginx reload
+yunohost_systemd_action nginx reload
 
 #=================================================
 # RESTORE RENEW CERT

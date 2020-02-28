@@ -30,8 +30,8 @@ ynh_script_progression "Removing static site..."
 rm -rf $www_path
 rm -f /etc/nginx/conf.d/$domain.d/$app.conf
 
-nginx -t > /dev/null
-service nginx reload
+nginx -tq
+yunohost_systemd_action nginx reload
 
 ynh_script_progression "Removing automatic vpn certificate renewal..."
 
