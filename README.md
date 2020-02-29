@@ -5,6 +5,30 @@ The neutrinet application is for Neutrinet members that have an Internet Cube co
 * It adds a webpage with general information about Neutrinet
 
 # Installation
+
+## From the web interface
+
+First make sure you have the neutrinet apps list
+1. Go to the admin interface on your cube
+2. Click *Tools*
+3. In the *Advanced* section, click *Applications lists*
+4. Check in the Applications lists section if you have *neutrinet*
+
+If you don't have it, under *Custom applications list*, fill in the form with:
+1. Name: *neutrinet*
+2. URL: *https://neutrinet.be/apps.json*
+
+Then, click on the *Add* button.
+
+Now, we can install the Neutrinet application:
+1. Go to the admin interface
+2. Click *Applications*
+3. Click *Install* button
+4. Select *All apps* on the right
+5. Search for *neutrinet*
+6. Click *Install*
+7. Fill in the form (or just keep the defaults) and click *Install* just like you would install any app from the web interface
+
 ## From the CLI
 
 First check if you have a list, probably named *neutrinet*, with *https://neutrinet.be/apps.json* as url.
