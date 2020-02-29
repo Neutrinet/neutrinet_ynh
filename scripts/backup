@@ -26,6 +26,7 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #=================================================
 # STANDARD BACKUP STEPS
@@ -36,7 +37,7 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 ynh_script_progression "Backing up..."
 
 ynh_backup "$www_path"
-ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup "$nginx_path"
 
 ynh_backup "$opt_path"
 ynh_backup "/etc/cron.daily/$app-renew-cert"
