@@ -26,6 +26,7 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
@@ -66,7 +67,7 @@ ynh_system_user_create $app_user "$www_path"
 ynh_script_progression "Restoring static site…"
 
 ynh_restore_file "$www_path"
-ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_restore_file "$nginx_path"
 chown -R $app_user: "$www_path"
 
 nginx -tq

@@ -27,6 +27,7 @@ www_path=$(ynh_app_setting_get $app www_path)
 
 domain=$YNH_APP_NEW_DOMAIN
 path_url=$YNH_APP_NEW_PATH
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #==================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -50,11 +51,13 @@ ynh_app_setting_set $app path_url $path_url
 
 ynh_script_progression "Updating nginx configuration..."
 
-sed -i "s@^location $old_path_url@location $path_url@g" \
-  /etc/nginx/conf.d/$old_domain.d/$app.conf
+cp ../conf/nginx.conf "$nginx_path"
+
+sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
+sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
 
 if [[ $old_domain != $domain ]]; then
-  mv /etc/nginx/conf.d/{$old_domain,$domain}.d/$app.conf
+  rm -f /etc/nginx/conf.d/$old_domain.d/$app.conf
 fi
 
 ynh_script_progression "Reloading nginx web server..."

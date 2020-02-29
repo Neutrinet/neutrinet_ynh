@@ -20,6 +20,7 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #=================================================
 # STANDARD REMOVE
@@ -28,7 +29,7 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 ynh_script_progression "Removing static site..."
 
 rm -rf $www_path
-rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+rm -f "$nginx_path"
 
 nginx -tq
 ynh_systemd_action nginx reload

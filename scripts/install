@@ -23,6 +23,7 @@ domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH_URL
 app=$YNH_APP_INSTANCE_NAME
 app_user=$app
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #==================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -92,10 +93,10 @@ ynh_script_progression "Installing static site…"
 cp -a ../sources/. $www_path
 chown -R $app_user: $www_path
 
-sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
-sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
+cp ../conf/nginx.conf "$nginx_path"
 
-cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
+sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
 
 nginx -tq
 ynh_systemd_action nginx reload

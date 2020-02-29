@@ -30,6 +30,8 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 manifest=/etc/yunohost/apps/$app/manifest.json
 version=$(jq '.version // empty' -r -e $manifest || ynh_app_setting_get $app version)
 
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
+
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -125,10 +127,10 @@ mkdir -p $www_path
 cp -r ../sources/. $www_path
 chown -R $app_user: $www_path
 
-sed -i "s@PATHTOCHANGE@$path_url@g" ../conf/nginx.conf
-sed -i "s@ALIASTOCHANGE@$www_path@g" ../conf/nginx.conf
+cp ../conf/nginx.conf "$nginx_path"
 
-cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
+sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
 
 nginx -tq
 ynh_systemd_action nginx reload
