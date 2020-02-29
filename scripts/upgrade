@@ -55,6 +55,9 @@ if [[ -z $app_user ]]; then
   ynh_app_setting_set $app app_user $app_user
 fi
 
+# Trim trailing slashes
+path_url=$(sed 's@/*$@@' <<< $path_url)
+
 if [[ -z $path_url ]]; then
   path_url=$path
 
@@ -63,12 +66,6 @@ if [[ -z $path_url ]]; then
   else
     ynh_app_setting_set $app path_url $path_url
   fi
-fi
-
-if [[ $path_url == */ ]]; then
-  # Trim trailing slashes
-  path_url=$(sed 's@/*$@@' <<< $path_url)
-  ynh_app_setting_set $app path_url $path_url
 fi
 
 # path setting is needed by Yunohost
