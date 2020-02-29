@@ -53,6 +53,11 @@ ynh_script_progression "Updating nginx configuration..."
 
 cp ../conf/nginx.conf "$nginx_path"
 
+if [[ $path_url == "/" ]]; then
+  sed -i "@^rewrite@d" "$nginx_path"
+  path_url=""
+fi
+
 sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
 sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
 

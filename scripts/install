@@ -95,6 +95,11 @@ chown -R $app_user: $www_path
 
 cp ../conf/nginx.conf "$nginx_path"
 
+if [[ $path_url == "/" ]]; then
+  sed -i "@^rewrite@d" "$nginx_path"
+  path_url=""
+fi
+
 sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
 sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
 
