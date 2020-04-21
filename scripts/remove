@@ -20,20 +20,21 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 www_path=$(ynh_app_setting_get $app www_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
+nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #=================================================
 # STANDARD REMOVE
 #=================================================
 
-ynh_print_info "Removing static site..."
+ynh_script_progression "Removing static site..."
 
 rm -rf $www_path
-rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+rm -f "$nginx_path"
 
-nginx -t > /dev/null
-service nginx reload
+nginx -tq
+ynh_systemd_action nginx reload
 
-ynh_print_info "Removing automatic vpn certificate renewal..."
+ynh_script_progression "Removing automatic vpn certificate renewal..."
 
 rm -rf $opt_path
 rm -rf /etc/cron.daily/$app-renew-cert
@@ -42,7 +43,7 @@ rm -rf /etc/cron.daily/$app-renew-cert
 # REMOVE DEPENDENCIES
 #=================================================
 
-ynh_print_info "Removing dependencies..."
+ynh_script_progression "Removing dependencies..."
 
 ynh_remove_app_dependencies
 
@@ -50,6 +51,6 @@ ynh_remove_app_dependencies
 # REMOVE DEDICATED USER
 #=================================================
 
-ynh_print_info "Removing system user..."
+ynh_script_progression "Removing system user..."
 ynh_system_user_delete $app_user
 
