@@ -139,7 +139,7 @@ ynh_script_progression "Setting up cron job for certificate renewal…"
 cat <<EOF > /etc/cron.daily/$app-renew-cert
 #!/bin/bash
 cd $renew_cert_path
-$renew_cert_path/$renew_cert_cron_script
+$renew_cert_path/$renew_cert_cron_script -q
 EOF
 
 chown root:root /etc/cron.daily/$app-renew-cert
