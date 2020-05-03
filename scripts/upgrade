@@ -151,6 +151,7 @@ renew_cert_cron_script="renew_cert_cron.sh"
 if [[ ! -e $renew_cert_path ]]; then
   git clone $renew_cert_repo $renew_cert_path
 else
+  git -C $renew_cert_path remote set-url origin $renew_cert_repo
   git -C $renew_cert_path fetch -t
 fi
 
