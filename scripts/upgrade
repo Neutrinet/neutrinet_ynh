@@ -101,7 +101,7 @@ fi
 
 ynh_script_progression "Installing static site..."
 
-rm -rf $final_path
+ynh_secure_remove $final_path
 mkdir -p $final_path
 cp -r ../sources/. $final_path
 chown -R $app_user: $final_path

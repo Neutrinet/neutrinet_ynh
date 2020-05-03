@@ -26,14 +26,14 @@ opt_path=$(ynh_app_setting_get $app opt_path)
 
 ynh_script_progression "Removing static site..."
 
-rm -rf $final_path
+ynh_secure_remove $final_path
 
 ynh_remove_nginx_config
 
 ynh_script_progression "Removing automatic vpn certificate renewal..."
 
-rm -rf $opt_path
-rm -rf /etc/cron.daily/$app-renew-cert
+ynh_secure_remove $opt_path
+ynh_secure_remove /etc/cron.daily/$app-renew-cert
 
 #=================================================
 # REMOVE DEPENDENCIES
