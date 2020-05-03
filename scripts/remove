@@ -20,7 +20,6 @@ path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
 final_path=$(ynh_app_setting_get $app final_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
-nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #=================================================
 # STANDARD REMOVE
@@ -29,10 +28,8 @@ nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 ynh_script_progression "Removing static site..."
 
 rm -rf $final_path
-rm -f "$nginx_path"
 
-nginx -tq
-ynh_systemd_action nginx reload
+ynh_remove_nginx_config
 
 ynh_script_progression "Removing automatic vpn certificate renewal..."
 

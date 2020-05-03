@@ -93,18 +93,7 @@ ynh_script_progression "Installing static site…"
 cp -a ../sources/. $final_path
 chown -R $app_user: $final_path
 
-cp ../conf/nginx.conf "$nginx_path"
-
-if [[ $path_url == "/" ]]; then
-  sed -i "/^rewrite/d" "$nginx_path"
-  path_url=""
-fi
-
-sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
-sed -i "s@ALIASTOCHANGE@$final_path@g" "$nginx_path"
-
-nginx -tq
-ynh_systemd_action nginx reload
+ynh_add_nginx_config
 
 #=================================================
 # INSTALL RENEW CERT
