@@ -29,27 +29,10 @@ app_user=$app
 #==================================================
 
 final_path=/var/www/$app
-if [[ -e $final_path ]]
-then
-  ynh_die "The path $final_path already contains a folder"
-fi
+[[ ! -e $final_path ]] || ynh_die "The path $final_path already contains a folder"
 
 opt_path=/opt/$app
-if [[ -e $opt_path ]]
-then
-  ynh_die "The path $opt_path already contains a folder"
-fi
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
-# Trim trailing slashes
-path_url=$(sed 's@*/$@@' <<< $path_url)
-
-# Check web path availability
-if ! ynh_webpath_available $domain $path_url
-then
-  ynh_die "$domain$path_url is not available"
-fi
+[[ ! -e $opt_path ]] || ynh_die "The path $opt_path already contains a folder"
 
 # Register (book) web path
 ynh_webpath_register $app $domain $path_url
