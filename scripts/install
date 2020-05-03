@@ -110,7 +110,7 @@ ynh_systemd_action nginx reload
 # INSTALL RENEW CERT
 #=================================================
 
-renew_cert_repo="https://github.com/neutrinet/renew_cert"
+renew_cert_repo="https://gitlab.domainepublic.net/Neutrinet/renew_cert.git"
 renew_cert_version=$(jq .version ../manifest.json -r -e | cut -d '~' -f 1)
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_cron_script="renew_cert_cron.sh"
