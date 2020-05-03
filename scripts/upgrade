@@ -37,7 +37,12 @@ nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 #=================================================
 
 if [[ -z $final_path ]]; then
-  final_path=/var/www/$app
+  if [[ -n "$(ynh_app_setting_get $app www_path)" ]]
+     final_path=$(ynh_app_setting_get $app www_path)
+     ynh_app_setting_delete $app www_path
+  else
+     final_path=/var/www/$app
+  fi
   ynh_app_setting_set $app final_path $final_path
 
   mkdir -p $final_path
