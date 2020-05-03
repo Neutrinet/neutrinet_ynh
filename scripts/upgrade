@@ -34,7 +34,7 @@ version=$(jq '.version // empty' -r -e $manifest || ynh_app_setting_get $app ver
 #=================================================
 
 if [[ -z $final_path ]]; then
-  if [[ -n "$(ynh_app_setting_get $app www_path)" ]]
+  if [[ -n "$(ynh_app_setting_get $app www_path)" ]]; then
      final_path=$(ynh_app_setting_get $app www_path)
      ynh_app_setting_delete $app www_path
   else
