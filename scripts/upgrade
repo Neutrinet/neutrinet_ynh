@@ -157,4 +157,6 @@ chmod 0755 /etc/cron.daily/$app-renew-cert
 #=================================================
 
 ynh_script_progression "Checking certificates..."
-/etc/cron.daily/$app-renew-cert
+
+# (This is expected to fail during CI tests because no credential available)
+/etc/cron.daily/$app-renew-cert || [ ${PACKAGE_CHECK_EXEC:-0} -eq 1 ]
