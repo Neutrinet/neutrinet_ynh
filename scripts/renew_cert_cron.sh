@@ -26,14 +26,6 @@ then
 fi
 RENEW_CERT_SCRIPT="${RENEW_CERT_PATH}/renew.py"
 
-DEBUG=false
-while getopts "v" opt
-do
-  case $opt in
-    v) DEBUG=true;;
-  esac
-done
-
 if [[ -f $OPENVPN_CREDENTIALS_FILE ]]
 then
   credentials_file=$OPENVPN_CREDENTIALS_FILE
@@ -50,30 +42,17 @@ password=$(tail -n 1 "$credentials_file")
 
 run_date=$(date +'%Y-%m-%d_%H:%M:%S')
 renew_dir="certs_$run_date"
+renew_params="$@"
 
-if $DEBUG
-then
-  $RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir" -v
-else
-  # Keep the logs for later. We will print them only if the certificates are being renewed.
-  renew_cert_logs=$($RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir")
-fi
+$RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir" $renew_params
 
 if [[ ! -d $renew_dir || ! -f $renew_dir/ca.crt || ! -f $renew_dir/client.crt || ! -f $renew_dir/client.key ]]
 then
-  if $DEBUG
-  then
-    echo "Cleaning $renew_dir directory."
-  fi
   rm -rf "$renew_dir"
   exit 0
 fi
 
-if [[ -n $renew_cert_logs ]]
-then
-  echo "$renew_cert_logs"
-fi
-
+echo "VPN certificate renewed!"
 echo "Saving old OpenVPN config"
 cp -r $OPENVPN_CONF_DIR{,.old_${run_date}}
 
@@ -87,6 +66,7 @@ cp "$renew_dir/client.key" "$OPENVPN_USER_KEY"
 
 echo "Adding user credentials"
 echo -e "$login\n$password" > "$OPENVPN_CREDENTIALS_FILE"
+chmod 0600 "$OPENVPN_CREDENTIALS_FILE"
 
 echo "Updating VPNClient config"
 yunohost app setting vpnclient server_name -v "vpn.neutrinet.be"
