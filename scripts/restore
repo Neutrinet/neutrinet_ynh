@@ -24,7 +24,7 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get $app domain)
 path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
-www_path=$(ynh_app_setting_get $app www_path)
+final_path=$(ynh_app_setting_get $app final_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
 nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
@@ -34,7 +34,7 @@ nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 ynh_script_progression "Checking for conflicts…"
 
-[[ ! -e $www_path ]] || ynh_die "The path $www_path already contains a folder"
+[[ ! -e $final_path ]] || ynh_die "The path $final_path already contains a folder"
 [[ ! -e $opt_path ]] || ynh_die "The path $opt_path already contains a folder"
 
 # Check web path availability
@@ -57,8 +57,8 @@ ynh_install_app_dependencies git python3-openssl python3-requests
 # CREATE DEDICATED USER
 #=================================================
 
-mkdir -p "$www_path"
-ynh_system_user_create $app_user "$www_path"
+mkdir -p "$final_path"
+ynh_system_user_create $app_user "$final_path"
 
 #=================================================
 # RESTORE STATIC FILES
@@ -66,9 +66,9 @@ ynh_system_user_create $app_user "$www_path"
 
 ynh_script_progression "Restoring static site…"
 
-ynh_restore_file "$www_path"
+ynh_restore_file "$final_path"
 ynh_restore_file "$nginx_path"
-chown -R $app_user: "$www_path"
+chown -R $app_user: "$final_path"
 
 nginx -tq
 ynh_systemd_action nginx reload

@@ -19,7 +19,7 @@ domain=$(ynh_app_setting_get $app domain)
 path=$(ynh_app_setting_get $app path)
 path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
-www_path=$(ynh_app_setting_get $app www_path)
+final_path=$(ynh_app_setting_get $app final_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
 
 # There are two ways to get the version:
@@ -36,11 +36,11 @@ nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 
-if [[ -z $www_path ]]; then
-  www_path=/var/www/$app
-  ynh_app_setting_set $app www_path $www_path
+if [[ -z $final_path ]]; then
+  final_path=/var/www/$app
+  ynh_app_setting_set $app final_path $final_path
 
-  mkdir -p $www_path
+  mkdir -p $final_path
 fi
 
 if [[ -z $opt_path ]]; then
@@ -100,7 +100,7 @@ ynh_script_progression "Upgrading dependencies..."
 
 if [[ $version < "0.3.0~ynh1" ]]; then
   ynh_app_setting_delete $app version
-  ynh_system_user_create --username $app_user --home_dir $www_path
+  ynh_system_user_create --username $app_user --home_dir $final_path
 fi
 
 if [[ $version < "0.3.0~ynh4" ]]; then
@@ -119,10 +119,10 @@ fi
 
 ynh_script_progression "Installing static site..."
 
-rm -rf $www_path
-mkdir -p $www_path
-cp -r ../sources/. $www_path
-chown -R $app_user: $www_path
+rm -rf $final_path
+mkdir -p $final_path
+cp -r ../sources/. $final_path
+chown -R $app_user: $final_path
 
 cp ../conf/nginx.conf "$nginx_path"
 
@@ -132,7 +132,7 @@ if [[ $path_url == "/" ]]; then
 fi
 
 sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
-sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
+sed -i "s@ALIASTOCHANGE@$final_path@g" "$nginx_path"
 
 nginx -tq
 ynh_systemd_action nginx reload

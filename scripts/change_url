@@ -23,7 +23,7 @@ app=$YNH_APP_INSTANCE_NAME
 
 old_domain=$YNH_APP_OLD_DOMAIN
 old_path_url=$YNH_APP_OLD_PATH
-www_path=$(ynh_app_setting_get $app www_path)
+final_path=$(ynh_app_setting_get $app final_path)
 
 domain=$YNH_APP_NEW_DOMAIN
 path_url=$YNH_APP_NEW_PATH
@@ -59,7 +59,7 @@ if [[ $path_url == "/" ]]; then
 fi
 
 sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
-sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
+sed -i "s@ALIASTOCHANGE@$final_path@g" "$nginx_path"
 
 if [[ $old_domain != $domain ]]; then
   rm -f /etc/nginx/conf.d/$old_domain.d/$app.conf

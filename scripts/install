@@ -29,10 +29,10 @@ nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #==================================================
 
-www_path=/var/www/$app
-if [[ -e $www_path ]]
+final_path=/var/www/$app
+if [[ -e $final_path ]]
 then
-  ynh_die "The path $www_path already contains a folder"
+  ynh_die "The path $final_path already contains a folder"
 fi
 
 opt_path=/opt/$app
@@ -62,7 +62,7 @@ ynh_webpath_register $app $domain $path_url
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app path_url $path_url
 ynh_app_setting_set $app app_user $app_user
-ynh_app_setting_set $app www_path $www_path
+ynh_app_setting_set $app final_path $final_path
 ynh_app_setting_set $app opt_path $opt_path
 
 #=================================================
@@ -81,8 +81,8 @@ ynh_install_app_dependencies git python3-openssl python3-requests
 
 ynh_script_progression "Creating app's user…"
 
-mkdir -p $www_path
-ynh_system_user_create $app_user $www_path
+mkdir -p $final_path
+ynh_system_user_create $app_user $final_path
 
 #=================================================
 # INSTALL STATIC FILE
@@ -90,8 +90,8 @@ ynh_system_user_create $app_user $www_path
 
 ynh_script_progression "Installing static site…"
 
-cp -a ../sources/. $www_path
-chown -R $app_user: $www_path
+cp -a ../sources/. $final_path
+chown -R $app_user: $final_path
 
 cp ../conf/nginx.conf "$nginx_path"
 
@@ -101,7 +101,7 @@ if [[ $path_url == "/" ]]; then
 fi
 
 sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
-sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
+sed -i "s@ALIASTOCHANGE@$final_path@g" "$nginx_path"
 
 nginx -tq
 ynh_systemd_action nginx reload
