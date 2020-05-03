@@ -23,7 +23,6 @@ domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH_URL
 app=$YNH_APP_INSTANCE_NAME
 app_user=$app
-nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #==================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
