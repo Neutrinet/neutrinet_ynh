@@ -22,7 +22,7 @@ ynh_abort_if_errors
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path_url)
+path_url=$(ynh_app_setting_get $app path)
 app_user=$(ynh_app_setting_get $app app_user)
 final_path=$(ynh_app_setting_get $app final_path)
 opt_path=$(ynh_app_setting_get $app opt_path)

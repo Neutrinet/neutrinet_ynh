@@ -20,7 +20,7 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH_URL
+path_url=$YNH_APP_ARG_PATH
 app=$YNH_APP_INSTANCE_NAME
 app_user=$app
 
@@ -42,7 +42,7 @@ ynh_webpath_register $app $domain $path_url
 #=================================================
 
 ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path_url $path_url
+ynh_app_setting_set $app path $path_url
 ynh_app_setting_set $app app_user $app_user
 ynh_app_setting_set $app final_path $final_path
 ynh_app_setting_set $app opt_path $opt_path
