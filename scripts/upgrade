@@ -30,6 +30,21 @@ manifest=/etc/yunohost/apps/$app/manifest.json
 version=$(jq '.version // empty' -r -e $manifest || ynh_app_setting_get $app version)
 
 #=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+
+ynh_script_progression "Creating backup..."
+
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+	# restore it if the upgrade fails
+	ynh_restore_upgradebackup
+}
+
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 
@@ -56,21 +71,6 @@ if [[ -z $app_user ]]; then
   app_user=$app
   ynh_app_setting_set $app app_user $app_user
 fi
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-
-ynh_script_progression "Creating backup..."
-
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	# restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
