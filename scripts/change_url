@@ -6,8 +6,8 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source /usr/share/yunohost/helpers
 source _common.sh
+source /usr/share/yunohost/helpers
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -19,53 +19,22 @@ ynh_abort_if_errors
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
+old_domain=$YNH_APP_OLD_DOMAIN
+old_path=$YNH_APP_OLD_PATH
+
+new_domain=$YNH_APP_NEW_DOMAIN
+new_path=$YNH_APP_NEW_PATH
+
 app=$YNH_APP_INSTANCE_NAME
 
-old_domain=$YNH_APP_OLD_DOMAIN
-old_path_url=$YNH_APP_OLD_PATH
-www_path=$(ynh_app_setting_get $app www_path)
+final_path=$(ynh_app_setting_get $app final_path)
 
 domain=$YNH_APP_NEW_DOMAIN
 path_url=$YNH_APP_NEW_PATH
-nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
-
-#==================================================
-# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
-#==================================================
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
-# Trim trailing slashes
-path_url=$(sed 's@*/$@@' <<< $path_url)
-
-#=================================================
-# STORE SETTINGS
-#=================================================
-
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path_url $path_url
 
 #=================================================
 # CHANGE URL IN NGINX CONFIG
 #=================================================
 
 ynh_script_progression "Updating nginx configuration..."
-
-cp ../conf/nginx.conf "$nginx_path"
-
-if [[ $path_url == "/" ]]; then
-  sed -i "/^rewrite/d" "$nginx_path"
-  path_url=""
-fi
-
-sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
-sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
-
-if [[ $old_domain != $domain ]]; then
-  rm -f /etc/nginx/conf.d/$old_domain.d/$app.conf
-fi
-
-ynh_script_progression "Reloading nginx web server..."
-
-nginx -tq
-ynh_systemd_action nginx reload
+ynh_add_nginx_config

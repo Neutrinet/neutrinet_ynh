@@ -6,8 +6,8 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source /usr/share/yunohost/helpers
 source _common.sh
+source /usr/share/yunohost/helpers
 
 #=================================================
 # LOAD SETTINGS
@@ -16,11 +16,9 @@ source _common.sh
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path_url)
 app_user=$(ynh_app_setting_get $app app_user)
-www_path=$(ynh_app_setting_get $app www_path)
+final_path=$(ynh_app_setting_get $app final_path)
 opt_path=$(ynh_app_setting_get $app opt_path)
-nginx_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # STANDARD REMOVE
@@ -28,18 +26,14 @@ nginx_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 ynh_script_progression "Removing static site..."
 
-rm -rf "$www_path"
-rm -f "$nginx_path"
+ynh_secure_remove $final_path
+
+ynh_remove_nginx_config
 
 ynh_script_progression "Removing automatic vpn certificate renewal..."
 
-rm -rf "$opt_path"
-rm -rf "/etc/cron.daily/$app-renew-cert"
-
-ynh_script_progression "Reloading Nginx..."
-
-nginx -tq
-ynh_systemd_action nginx reload
+ynh_secure_remove $opt_path
+ynh_secure_remove /etc/cron.daily/$app-renew-cert
 
 #=================================================
 # REMOVE DEPENDENCIES

@@ -6,8 +6,8 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source /usr/share/yunohost/helpers
 source _common.sh
+source /usr/share/yunohost/helpers
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -20,37 +20,19 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH_URL
+path_url=$YNH_APP_ARG_PATH
 app=$YNH_APP_INSTANCE_NAME
 app_user=$app
-nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 
 #==================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #==================================================
 
-www_path=/var/www/$app
-if [[ -e $www_path ]]
-then
-  ynh_die "The path $www_path already contains a folder"
-fi
+final_path=/var/www/$app
+[[ ! -e $final_path ]] || ynh_die "The path $final_path already contains a folder"
 
 opt_path=/opt/$app
-if [[ -e $opt_path ]]
-then
-  ynh_die "The path $opt_path already contains a folder"
-fi
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
-# Trim trailing slashes
-path_url=$(sed 's@*/$@@' <<< $path_url)
-
-# Check web path availability
-if ! ynh_webpath_available $domain $path_url
-then
-  ynh_die "$domain$path_url is not available"
-fi
+[[ ! -e $opt_path ]] || ynh_die "The path $opt_path already contains a folder"
 
 # Register (book) web path
 ynh_webpath_register $app $domain $path_url
@@ -60,9 +42,9 @@ ynh_webpath_register $app $domain $path_url
 #=================================================
 
 ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path_url $path_url
+ynh_app_setting_set $app path $path_url
 ynh_app_setting_set $app app_user $app_user
-ynh_app_setting_set $app www_path $www_path
+ynh_app_setting_set $app final_path $final_path
 ynh_app_setting_set $app opt_path $opt_path
 
 #=================================================
@@ -81,8 +63,8 @@ ynh_install_app_dependencies git python3-openssl python3-requests
 
 ynh_script_progression "Creating app's user…"
 
-mkdir -p $www_path
-ynh_system_user_create $app_user $www_path
+mkdir -p $final_path
+ynh_system_user_create $app_user $final_path
 
 #=================================================
 # INSTALL STATIC FILE
@@ -90,21 +72,10 @@ ynh_system_user_create $app_user $www_path
 
 ynh_script_progression "Installing static site…"
 
-cp -a ../sources/. $www_path
-chown -R $app_user: $www_path
+cp -a ../sources/. $final_path
+chown -R $app_user: $final_path
 
-cp ../conf/nginx.conf "$nginx_path"
-
-if [[ $path_url == "/" ]]; then
-  sed -i "/^rewrite/d" "$nginx_path"
-  path_url=""
-fi
-
-sed -i "s@PATHTOCHANGE@$path_url@g" "$nginx_path"
-sed -i "s@ALIASTOCHANGE@$www_path@g" "$nginx_path"
-
-nginx -tq
-ynh_systemd_action nginx reload
+ynh_add_nginx_config
 
 #=================================================
 # INSTALL RENEW CERT
@@ -151,4 +122,8 @@ chmod 0755 /etc/cron.daily/$app-renew-cert
 
 ynh_script_progression "Checking certificates…"
 
-/etc/cron.daily/$app-renew-cert
+# (This is expected to fail during CI tests because no credential available)
+if [[ ${PACKAGE_CHECK_EXEC:-0} -eq 0 ]]
+then
+    /etc/cron.daily/$app-renew-cert
+fi

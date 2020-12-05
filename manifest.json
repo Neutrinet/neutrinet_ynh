@@ -1,12 +1,13 @@
 {
     "name": "Neutrinet",
     "id": "neutrinet",
+    "packaging_format": 1,
     "description": {
         "en": "Auto renewal for the Neutrinet vpn-certificates",
         "fr": "Renouvellement automatique des certificats vpn Neutrinet"
     },
-    "version": "0.3.1~ynh1",
-    "license": "GPL-3+",
+    "version": "0.3.1~ynh2",
+    "license": "AGPL-3.0-or-later",
     "maintainer": {
         "name": "ilja",
         "email": "neutrinet@spectraltheorem.be",
@@ -15,7 +16,7 @@
     "requirements": {
         "yunohost": ">= 3.5.0"
     },
-    "multi_instance": "false",
+    "multi_instance": false,
     "services": [
         "nginx"
     ],
@@ -31,7 +32,7 @@
                 "example": "domain.org"
             },
             {
-                "name": "path_url",
+                "name": "path",
                 "type": "path",
                 "ask": {
                     "en": "Choose a path for Neutrinet application",
