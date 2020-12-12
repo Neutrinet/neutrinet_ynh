@@ -1,5 +1,9 @@
 # Overview
 
+[![Integration level](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) [![](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg)](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) [![](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
+
+[![Install Neutrinet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=neutrinet)
+
 The neutrinet application is for Neutrinet members that have an Internet Cube configured and does 2 things:
 * It renews the vpn-certificates
 * It adds a webpage with general information about Neutrinet
