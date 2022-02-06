@@ -6,15 +6,20 @@
         "en": "Auto renewal for the Neutrinet vpn-certificates",
         "fr": "Renouvellement automatique des certificats vpn Neutrinet"
     },
-    "version": "0.3.1~ynh2",
+    "version": "0.3.1~ynh3",
+    "url": "https://git.domainepublic.net/Neutrinet/neutrinet_ynh",
+    "upstream": {
+        "license": "AGPL-3.0-or-later",
+        "code": "https://git.domainepublic.net/Neutrinet/renew_cert"
+    },
     "license": "AGPL-3.0-or-later",
     "maintainer": {
-        "name": "ilja",
-        "email": "neutrinet@spectraltheorem.be",
-        "url": "https://gitlab.com/Spctrl"
+        "name": "Neutrinet",
+        "email": "contact@neutrinet.be",
+        "url": "https://neutrinet.be"
     },
     "requirements": {
-        "yunohost": ">= 3.5.0"
+        "yunohost": ">= 4.3.0"
     },
     "multi_instance": false,
     "services": [
@@ -24,20 +29,11 @@
         "install" : [
             {
                 "name": "domain",
-                "type": "domain",
-                "ask": {
-                    "en": "Choose a domain for Neutrinet application",
-                    "fr": "Choisissez un domaine pour l'application Neutrinet"
-                },
-                "example": "domain.org"
+                "type": "domain"
             },
             {
                 "name": "path",
                 "type": "path",
-                "ask": {
-                    "en": "Choose a path for Neutrinet application",
-                    "fr": "Choisissez un chemin pour l'application Neutrinet"
-                },
                 "example": "/neutrinet",
                 "default": "/neutrinet"
             }
