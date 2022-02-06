@@ -34,8 +34,6 @@ nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
 
-ynh_script_progression "Backing up..."
-
 ynh_backup "$final_path"
 ynh_backup "$nginx_path"
 
