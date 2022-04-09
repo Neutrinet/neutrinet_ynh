@@ -62,7 +62,9 @@ ynh_script_progression "Restoring static site…"
 
 ynh_restore_file "$final_path"
 ynh_restore_file "$nginx_path"
-chown -R $app_user: "$final_path"
+chown -R $app_user:www-data $final_path
+find ${final_path} -type d -exec chmod 0750 {} \;
+find ${final_path} -type f -exec chmod 0640 {} \;
 
 nginx -tq
 ynh_systemd_action nginx reload
