@@ -6,7 +6,7 @@
         "en": "Auto renewal for the Neutrinet vpn-certificates",
         "fr": "Renouvellement automatique des certificats vpn Neutrinet"
     },
-    "version": "0.3.1~ynh4",
+    "version": "0.3.1~ynh3",
     "url": "https://git.domainepublic.net/Neutrinet/renew_cert",
     "upstream": {
         "license": "AGPL-3.0-or-later",
