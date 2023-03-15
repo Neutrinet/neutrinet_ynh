@@ -88,17 +88,18 @@ renew_cert_version=$(jq .version ../manifest.json -r -e | cut -d '~' -f 1)
 renew_cert_path="$opt_path/renew_cert"
 renew_cert_cron_script="renew_cert_cron.sh"
 
+ynh_script_progression "Setting up permissions"
+mkdir -p $opt_path
+chown -R $app_user: $opt_path
+
 ynh_script_progression "Installing automatic VPN certificate renewal…"
 
-ynh_exec_warn_less git clone $renew_cert_repo $renew_cert_path
-ynh_exec_warn_less git -C $renew_cert_path checkout $renew_cert_version
+ynh_exec_warn_less sudo -u $app_user git clone $renew_cert_repo $renew_cert_path
+ynh_exec_warn_less sudo -u $app_user git -C $renew_cert_path checkout $renew_cert_version
 
 # We wrap the python3 script that actually renew the VPN certificate
 # This wrapper will be used as a daily cron task
 cp ../conf/$renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
-
-ynh_script_progression "Setting up permissions"
-chown -R $app_user: $opt_path
 
 chmod 0755 $renew_cert_path/$renew_cert_cron_script
 chown root: $renew_cert_path/$renew_cert_cron_script
