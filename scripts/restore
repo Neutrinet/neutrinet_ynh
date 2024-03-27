@@ -1,88 +1,34 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
+# RESTORE THE APP MAIN DIR
 #=================================================
+ynh_script_progression --message="Restoring the app main directory..." --weight=1
 
-ynh_abort_if_errors
+ynh_restore_file --origin_path="$install_dir"
 
-#=================================================
-# LOAD SETTINGS
-#=================================================
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
-app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-opt_path=$(ynh_app_setting_get $app opt_path)
-nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
+chown -R "$app:www-data" "$install_dir"
 
 #=================================================
-# CHECK IF THE APP CAN BE RESTORED
+# RESTORE SYSTEM CONFIGURATIONS
 #=================================================
+ynh_script_progression --message="Restoring system configurations related to $app..." --weight=1
 
-ynh_script_progression "Checking for conflicts…"
-
-[[ ! -e $final_path ]] || ynh_die "The path $final_path already contains a folder"
-[[ ! -e $opt_path ]] || ynh_die "The path $opt_path already contains a folder"
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
-# STANDARD MODIFICATIONS
-#=================================================
-# INSTALL DEPENDENCIES
+# RESTORE VARIOUS FILES
 #=================================================
 
-ynh_script_progression "Installing dependencies…"
-
-ynh_install_app_dependencies git python3-openssl python3-requests
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-
-mkdir -p "$final_path"
-ynh_system_user_create $app_user "$final_path"
-
-#=================================================
-# RESTORE STATIC FILES
-#=================================================
-
-ynh_script_progression "Restoring static site…"
-
-ynh_restore_file "$final_path"
-ynh_restore_file "$nginx_path"
-chown -R $app_user:www-data $final_path
-find ${final_path} -type d -exec chmod 0750 {} \;
-find ${final_path} -type f -exec chmod 0640 {} \;
-
-nginx -tq
-ynh_systemd_action nginx reload
-
-#=================================================
-# RESTORE RENEW CERT
-#=================================================
-
-ynh_script_progression "Restoring automatic VPN certificates renewal…"
-
-ynh_restore_file "$opt_path"
-ynh_restore_file "/etc/cron.daily/$app-renew-cert"
-
-chown -R $app_user: $opt_path
-chown root:root /etc/cron.daily/$app-renew-cert \
-      $opt_path/renew_cert/renew_cert_cron.sh
-chmod 0755 /etc/cron.daily/$app-renew-cert \
-      $opt_path/renew_cert/renew_cert_cron.sh
+ynh_restore_file --origin_path="/etc/cron.daily/$app-renew-cert"
 
 #=================================================
 # FINALIZATION
@@ -91,7 +37,12 @@ chmod 0755 /etc/cron.daily/$app-renew-cert \
 ynh_script_progression "Checking certificates…"
 
 # (This is expected to fail during CI tests because no credential available)
-if [[ ${PACKAGE_CHECK_EXEC:-0} -eq 0 ]]
-then
-    /etc/cron.daily/$app-renew-cert
+if [[ "${PACKAGE_CHECK_EXEC:-0}" -eq 0 ]]; then
+    "/etc/cron.daily/$app-renew-cert"
 fi
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Restoration completed for $app" --last
