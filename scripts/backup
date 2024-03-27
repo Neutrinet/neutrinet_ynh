@@ -1,42 +1,39 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
+# DECLARE DATA AND CONF FILES TO BACKUP
 #=================================================
-
-ynh_abort_if_errors
-
-#=================================================
-# LOAD SETTINGS
-#=================================================
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
-app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-opt_path=$(ynh_app_setting_get $app opt_path)
-nginx_path=/etc/nginx/conf.d/$domain.d/$app.conf
+ynh_print_info --message="Declaring files to be backed up..."
 
 #=================================================
-# STANDARD BACKUP STEPS
-#=================================================
-# BACKUP THE NGINX CONFIGURATION
+# BACKUP THE APP MAIN DIR
 #=================================================
 
-ynh_backup "$final_path"
-ynh_backup "$nginx_path"
+ynh_backup --src_path="$install_dir"
 
-ynh_backup "$opt_path"
-ynh_backup "/etc/cron.daily/$app-renew-cert"
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
 
+# Backup the nginx configuration
+ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
+
+#=================================================
+# BACKUP VARIOUS FILES
+#=================================================
+
+ynh_backup --src_path="/etc/cron.daily/$app-renew-cert"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."

@@ -1,0 +1,49 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "neutrinet"
+name = "Neutrinet"
+description.en = "Auto renewal for the Neutrinet vpn-certificates"
+description.fr = "Renouvellement automatique des certificats vpn Neutrinet"
+
+version = "0.3.1~ynh6"
+
+maintainers = ["Neutrinet"]
+
+[upstream]
+license = "AGPL-3.0-or-later"
+code = "https://git.domainepublic.net/Neutrinet/renew_cert"
+website = "https://git.domainepublic.net/Neutrinet/renew_cert"
+cpe = "???"
+fund = "https://wiki.neutrinet.be/fr/administration/banks"
+
+[integration]
+yunohost = ">= 11.2"
+architectures = "all"
+multi_instance = false
+ldap = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "sso" key : the "ldap" key corresponds to wether or not a user *can* login on the app using its YunoHost credentials.
+sso = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "ldap" key : the "sso" key corresponds to wether or not a user is *automatically logged-in* on the app when logged-in on the YunoHost portal.
+disk = "50M"
+ram.build = "50M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/neutrinet"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "visitors"
+
+[resources]
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.permissions]
+    main.url = "/"

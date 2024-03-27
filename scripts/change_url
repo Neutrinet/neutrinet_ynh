@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,31 +8,15 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
+# MODIFY URL IN NGINX CONF
 #=================================================
+ynh_script_progression --message="Updating NGINX web server configuration..." --weight=1
 
-ynh_abort_if_errors
-
-#=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
-#=================================================
-
-old_domain=$YNH_APP_OLD_DOMAIN
-old_path=$YNH_APP_OLD_PATH
-
-new_domain=$YNH_APP_NEW_DOMAIN
-new_path=$YNH_APP_NEW_PATH
-
-app=$YNH_APP_INSTANCE_NAME
-
-final_path=$(ynh_app_setting_get $app final_path)
-
-domain=$YNH_APP_NEW_DOMAIN
-path_url=$YNH_APP_NEW_PATH
+# this will most likely adjust NGINX config correctly
+ynh_change_url_nginx_config
 
 #=================================================
-# CHANGE URL IN NGINX CONFIG
+# END OF SCRIPT
 #=================================================
 
-ynh_script_progression "Updating nginx configuration..."
-ynh_add_nginx_config
+ynh_script_progression --message="Change of URL completed for $app" --last

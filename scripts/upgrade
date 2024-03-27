@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,160 +8,82 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
-app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-opt_path=$(ynh_app_setting_get $app opt_path)
-
-# There are two ways to get the version:
-# - before 0.3.0~ynh1: version is only stored in app settings
-# - after 0.3.0~ynh1: version is only stored in the manifest
-# We don't use ynh_app_upstream_version, because it would return "null"
-# when the version isn't in the manifest
-manifest=/etc/yunohost/apps/$app/manifest.json
-version=$(jq '.version // empty' -r -e $manifest || ynh_app_setting_get $app version)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-
-ynh_script_progression "Creating backup..."
-
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	# restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
+ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
-if [[ -z $final_path ]]; then
-  if [[ -n "$(ynh_app_setting_get $app www_path)" ]]; then
-     final_path=$(ynh_app_setting_get $app www_path)
-     ynh_app_setting_delete $app www_path
-  else
-     final_path=/var/www/$app
-  fi
-  ynh_app_setting_set $app final_path $final_path
-
-  mkdir -p $final_path
+if [ ! -d "$install_dir/app" ]; then
+    mkdir "$install_dir/app"
+    find . -mindepth 1 -maxdepth 1 ! -name "app" -exec mv -t "$install_dir/app" "{}" +
 fi
 
-if [[ -z $opt_path ]]; then
-  opt_path=/opt/$app
-  ynh_app_setting_set $app opt_path $opt_path
 
-  mkdir -p $opt_path
+if [[ -n "$opt_path" ]]; then
+    mv "$opt_path" "$install_dir/renew_cert"
+    ynh_app_setting_delete --app="$app" --key=opt_path
 fi
 
-if [[ -z $app_user ]]; then
-  app_user=$app
-  ynh_app_setting_set $app app_user $app_user
+if [[ -n "$app_user" ]]; then
+    ynh_app_setting_delete --app="$app" --key=app_user
 fi
 
-#=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-
-ynh_script_progression "Upgrading dependencies..."
-
-if [[ $version < "0.3.0~ynh1" ]]; then
-  ynh_app_setting_delete $app version
-  ynh_system_user_create --username $app_user --home_dir $final_path
+if [[ -n "$version" ]]; then
+    ynh_app_setting_delete --app="$app" --key=version
 fi
 
-if [[ $version < "0.3.0~ynh4" ]]; then
-  ynh_print_info "Removing old dependencies..."
-  ynh_remove_app_dependencies virtualenv python3-venv libssl-dev libffi-dev python3-dev
-
-  ynh_print_info "Upgrading dependencies..."
-  ynh_install_app_dependencies python3-openssl python3-requests
-fi
-
-#=================================================
-# PULL CHANGES AND SPECIFIC SETUP
 #=================================================
 # REINSTALL STATIC FILES
 #=================================================
-
 ynh_script_progression "Installing static site..."
 
-ynh_secure_remove $final_path
-mkdir -p $final_path
-cp -r ../sources/. $final_path
-chown -R $app_user:www-data $final_path
-find ${final_path} -type d -exec chmod 0750 {} \;
-find ${final_path} -type f -exec chmod 0640 {} \;
+ynh_secure_remove --file="$install_dir/app"
+cp -r ../sources/. "$install_dir/app"
 
-ynh_add_nginx_config
+chmod u+rwX,g+rX,o-rwx "$install_dir/app"
+chown -R "$app_user:www-data" "$install_dir/app"
 
 #=================================================
 # REINSTALL RENEW CERT
 #=================================================
+ynh_script_progression "Installing automatic VPN certificate renewal…"
 
-ynh_script_progression "Installing automatic VPN certificate renewal..."
-
-renew_cert_repo="https://gitlab.domainepublic.net/Neutrinet/renew_cert.git"
-renew_cert_version=$(jq .version ../manifest.json -r -e | cut -d '~' -f 1)
-renew_cert_path="$opt_path/renew_cert"
-renew_cert_cron_script="renew_cert_cron.sh"
-
-ynh_script_progression "Setting up permissions"
-mkdir -p $opt_path
-chown -R $app_user: $opt_path
-
-if [[ ! -e $renew_cert_path ]]; then
-  ynh_exec_warn_less sudo -u $app_user git clone $renew_cert_repo $renew_cert_path
+renew_cert_path="$install_dir/renew_cert"
+if [[ ! -e "$renew_cert_path" ]]; then
+    ynh_exec_warn_less ynh_exec_as "$app" git clone "$renew_cert_repo" "$renew_cert_path"
 else
-  ynh_exec_warn_less sudo -u $app_user git -C $renew_cert_path remote set-url origin $renew_cert_repo
-  ynh_exec_warn_less sudo -u $app_user git -C $renew_cert_path fetch -t
+    ynh_exec_warn_less ynh_exec_as "$app" git -C "$renew_cert_path" remote set-url origin "$renew_cert_repo"
+    ynh_exec_warn_less ynh_exec_as "$app" git -C "$renew_cert_path" fetch -t
 fi
-
-ynh_exec_warn_less sudo -u $app_user git -C $renew_cert_path checkout $renew_cert_version
+ynh_exec_warn_less ynh_exec_as "$app" git -C "$renew_cert_path" checkout "$(ynh_app_upstream_version)"
 
 # We wrap the python3 script that actually renew the VPN certificate
 # This wrapper will be used as a daily cron task
-cp ../conf/$renew_cert_cron_script $renew_cert_path/$renew_cert_cron_script
-
-chmod 755 $renew_cert_path/$renew_cert_cron_script
-chown root: $renew_cert_path/$renew_cert_cron_script
+cp "../conf/$renew_cert_cron_script" "$renew_cert_path/renew_cert.sh"
+chmod 0755 "$renew_cert_path/renew_cert.sh"
+chown root: "$renew_cert_path/renew_cert.sh"
 
 #=================================================
-# SETTING UP CRONTAB
+# REAPPLY SYSTEM CONFIGURATIONS
 #=================================================
+ynh_script_progression --message="Upgrading system configurations related to $app..." --weight=1
 
-ynh_script_progression "Setting up cron job for renewal..."
+ynh_add_nginx_config
 
-cat <<EOF > /etc/cron.daily/$app-renew-cert
-#!/bin/bash
-cd $renew_cert_path
-$renew_cert_path/$renew_cert_cron_script -q
-EOF
-
-chown root:root /etc/cron.daily/$app-renew-cert
-chmod 0755 /etc/cron.daily/$app-renew-cert
+ynh_add_config --template="renew-cert-cron.sh" --destination="/etc/cron.daily/$app-renew-cert"
+chown root:root "/etc/cron.daily/$app-renew-cert"
+chmod 0755 "/etc/cron.daily/$app-renew-cert"
 
 #=================================================
 # FINALIZATION
 #=================================================
-
-ynh_script_progression "Checking certificates..."
+ynh_script_progression "Checking certificates…"
 
 # (This is expected to fail during CI tests because no credential available)
-if [[ ${PACKAGE_CHECK_EXEC:-0} -eq 0 ]]
-then
-    /etc/cron.daily/$app-renew-cert
+if [[ "${PACKAGE_CHECK_EXEC:-0}" -eq 0 ]]; then
+    "/etc/cron.daily/$app-renew-cert"
 fi
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+ynh_script_progression --message="Installation of $app completed" --last

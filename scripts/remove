@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,43 +8,21 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
+# REMOVE SYSTEM CONFIGURATIONS
 #=================================================
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get $app domain)
-app_user=$(ynh_app_setting_get $app app_user)
-final_path=$(ynh_app_setting_get $app final_path)
-opt_path=$(ynh_app_setting_get $app opt_path)
-
-#=================================================
-# STANDARD REMOVE
-#=================================================
-
-ynh_script_progression "Removing static site..."
-
-ynh_secure_remove $final_path
+ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
 
 ynh_remove_nginx_config
 
-ynh_script_progression "Removing automatic vpn certificate renewal..."
-
-ynh_secure_remove $opt_path
-ynh_secure_remove /etc/cron.daily/$app-renew-cert
+ynh_secure_remove "/etc/cron.daily/$app-renew-cert"
 
 #=================================================
-# REMOVE DEPENDENCIES
+# REMOVE LEGACY PATHS
 #=================================================
-
-ynh_script_progression "Removing dependencies..."
-
-ynh_remove_app_dependencies
+ynh_secure_remove --file="$opt_path"
 
 #=================================================
-# REMOVE DEDICATED USER
+# END OF SCRIPT
 #=================================================
 
-ynh_script_progression "Removing system user..."
-ynh_system_user_delete $app_user
-
+ynh_script_progression --message="Removal of $app completed" --last
