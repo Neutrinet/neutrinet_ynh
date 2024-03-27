@@ -28,7 +28,7 @@ ynh_exec_warn_less ynh_exec_as "$app" git -C "$renew_cert_path" checkout "$(ynh_
 
 # We wrap the python3 script that actually renew the VPN certificate
 # This wrapper will be used as a daily cron task
-cp "../conf/$renew_cert_cron_script" "$renew_cert_path/renew_cert.sh"
+cp "../conf/renew_cert.sh" "$renew_cert_path/renew_cert.sh"
 chmod 0755 "$renew_cert_path/renew_cert.sh"
 chown root: "$renew_cert_path/renew_cert.sh"
 
