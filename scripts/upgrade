@@ -40,7 +40,7 @@ ynh_secure_remove --file="$install_dir/app"
 cp -r ../sources/. "$install_dir/app"
 
 chmod u+rwX,g+rX,o-rwx "$install_dir/app"
-chown -R "$app_user:www-data" "$install_dir/app"
+chown -R "$app:www-data" "$install_dir/app"
 
 #=================================================
 # REINSTALL RENEW CERT
