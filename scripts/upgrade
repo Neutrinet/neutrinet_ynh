@@ -14,7 +14,7 @@ ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 if [ ! -d "$install_dir/app" ]; then
     mkdir "$install_dir/app"
-    find . -mindepth 1 -maxdepth 1 ! -name "app" -exec mv -t "$install_dir/app" "{}" +
+    find "$install_dir" -mindepth 1 -maxdepth 1 ! -name "app" -exec mv -t "$install_dir/app" "{}" +
 fi
 
 if [[ -n "${opt_path:-}" ]]; then
