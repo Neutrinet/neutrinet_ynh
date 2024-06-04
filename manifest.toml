@@ -13,8 +13,7 @@ maintainers = ["Neutrinet"]
 
 [upstream]
 license = "AGPL-3.0-or-later"
-code = "https://git.domainepublic.net/Neutrinet/renew_cert"
-website = "https://git.domainepublic.net/Neutrinet/renew_cert"
+code = "https://gitlab.domainepublic.net/Neutrinet/renew_cert"
 fund = "https://wiki.neutrinet.be/fr/administration/banks"
 
 [integration]
