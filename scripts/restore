@@ -51,7 +51,7 @@ ynh_script_progression --message="Checking certificates…"
 
 # (This is expected to fail during CI tests because no credential available)
 if [[ "${PACKAGE_CHECK_EXEC:-0}" -eq 0 ]]; then
-    "$data_dir/renew_cert/renew_cert.sh"
+    ynh_exec_warn_less "$data_dir/renew_cert/renew_cert.sh"
 fi
 
 #=================================================
