@@ -15,7 +15,7 @@ fi
 
 echo "VPN certificate renewed!"
 echo "Backuping OpenVPN config"
-yunohost backup create -n "renew-cert_$(date +'%y-%m-%d_%H:%M:%S')" --apps vpnclient
+yunohost backup create -n "vpnclient-renew-cert_$(date +'%Y%m%d_%H%M%S')" --apps vpnclient
 
 echo "Copying new certificates"
 cp "${renew_dir}/ca.crt" "${OPENVPN_KEYS_DIR}/ca-server.crt"
