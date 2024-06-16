@@ -4,20 +4,13 @@
 You can manually run the cron job that attempts to renew the certificates:
 
 ```shell
-sudo /etc/cron.daily/neutrinet-renew-cert
-```
-
-This actually runs the script in `/opt/neutrinet/renew_cert/`:
-
-```shell
-cd /opt/neutrinet/renew_cert
-sudo ./renew_cert.sh
+sudo /opt/neutrinet/renew_cert/renew_cert.sh
 ```
 
 You can increase the verbosity with the option `-v`:
 
 ```shell
-sudo ./renew_cert.sh -v
+sudo /opt/neutrinet/renew_cert/renew_cert.sh -v
 ```
 
 To install the app without checking for certificates, run `export PACKAGE_CHECK_EXEC=1`.
