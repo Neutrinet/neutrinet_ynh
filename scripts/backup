@@ -36,7 +36,7 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 # BACKUP VARIOUS FILES
 #=================================================
 
-ynh_backup --src_path="/etc/cron.daily/$app-renew-cert"
+ynh_backup --src_path="/etc/cron.d/$app-renew-cert"
 
 #=================================================
 # END OF SCRIPT

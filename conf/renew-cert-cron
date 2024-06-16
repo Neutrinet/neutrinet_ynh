@@ -1,0 +1,1 @@
+0 0 * * * root "__DATA_DIR__/renew_cert/renew_cert.sh" -q

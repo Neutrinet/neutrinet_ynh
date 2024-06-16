@@ -14,7 +14,7 @@ ynh_script_progression --message="Removing system configurations related to $app
 
 ynh_remove_nginx_config
 
-ynh_secure_remove "/etc/cron.daily/$app-renew-cert"
+ynh_secure_remove --file="/etc/cron.d/$app-renew-cert"
 
 ynh_secure_remove --file="$data_dir"
 
