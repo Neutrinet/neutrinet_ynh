@@ -30,7 +30,7 @@ echo "Cleaning up files"
 rm -rf "$renew_dir"
 
 echo "Restarting VPN client to apply new certificate"
-yunohost service restart vpnclient
+yunohost service restart ynh-vpnclient
 
 if ! ynh-vpnclient status; then
   >&2 echo "ERROR: Failed to restart VPN client"
