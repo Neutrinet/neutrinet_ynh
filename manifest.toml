@@ -46,6 +46,9 @@ ram.runtime = "50M"
     autoupdate.strategy = "latest_gitlab_release"
     autoupdate.asset = "tarball"
 
+    [resources.apt]
+    packages = ["python3-openssl", "python3-requests", "python3-arrow"]
+
     [resources.system_user]
 
     [resources.install_dir]
