@@ -3,17 +3,10 @@
 SCRIPT_DIR=$(dirname "$0")
 
 OPENVPN_KEYS_DIR="/etc/openvpn/keys"
-OPENVPN_CREDENTIALS_FILE="/etc/openvpn/keys/credentials"
-
-if [[ ! -f "${OPENVPN_CREDENTIALS_FILE}" ]]; then
-  >&2 echo "ERROR: Cannot find credentials for Neutrinet VPN: ${OPENVPN_CREDENTIALS_FILE} doesn't exist."
-  exit 1
-fi
 
 renew_dir=$(mktemp -d /tmp/renew_cert.XXXXX)
-
 renew_params="$@"
-/usr/bin/env python3 $SCRIPT_DIR/renew.py -C "${OPENVPN_CREDENTIALS_FILE}" -d "${renew_dir}" $renew_params
+/usr/bin/env python3 $SCRIPT_DIR/renew.py -d "${renew_dir}" $renew_params
 
 if [[ ! -f "${renew_dir}/ca.crt" || ! -f "${renew_dir}/client.crt" || ! -f "${renew_dir}/client.key" ]]; then
   rm -rf "${renew_dir}"
