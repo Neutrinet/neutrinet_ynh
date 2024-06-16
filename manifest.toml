@@ -7,7 +7,7 @@ name = "Neutrinet"
 description.en = "Auto renewal for the Neutrinet vpn-certificates"
 description.fr = "Renouvellement automatique des certificats vpn Neutrinet"
 
-version = "0.4.0~ynh1"
+version = "0.4.1~ynh1"
 
 maintainers = ["Neutrinet"]
 
@@ -40,8 +40,8 @@ ram.runtime = "50M"
 
 [resources]
     [resources.sources.main]
-    url = "https://gitlab.domainepublic.net/Neutrinet/renew_cert/-/archive/0.3.1/renew_cert-0.3.1.tar.gz"
-    sha256 = "7cee21fd562d0bd02eeba236c1d4122b4bfeb5e5eea6b1a558d9605014a52d41"
+    url = "https://gitlab.domainepublic.net/Neutrinet/renew_cert/-/archive/0.4.1/renew_cert-0.4.1.tar.bz2"
+    sha256 = "0922859487539aff10dd4c9671ac3d68dd230e6aaf22489d43d3987a1035fdad"
 
     autoupdate.strategy = "latest_gitlab_release"
     autoupdate.asset = "tarball"

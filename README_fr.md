@@ -20,7 +20,7 @@ Il NE doit PAS être modifié à la main.
 
 The Neutrinet application is for Neutrinet members that have a Neutrinet VPN. It automatically checks and renews the VPN certificates. This package also contains a web page with contact information and other useful links.
 
-**Version incluse :** 0.4.0~ynh1
+**Version incluse :** 0.4.1~ynh1
 
 ## Documentations et ressources
 
