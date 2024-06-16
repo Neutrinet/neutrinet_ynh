@@ -5,9 +5,7 @@ EZ editatu eskuz.
 
 # Neutrinet YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) 
-
-![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
 
 [![Instalatu Neutrinet YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=neutrinet)
 
@@ -20,17 +18,17 @@ EZ editatu eskuz.
 
 The Neutrinet application is for Neutrinet members that have a Neutrinet VPN. It automatically checks and renews the VPN certificates. This package also contains a web page with contact information and other useful links.
 
-**Paketatutako bertsioa:** 0.4.1~ynh1
 
+**Paketatutako bertsioa:** 0.4.1~ynh1
 ## Dokumentazioa eta baliabideak
 
-* Jatorrizko aplikazioaren kode-gordailua: <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
-* YunoHost Denda: <https://apps.yunohost.org/app/neutrinet>
-* Eman errore baten berri: <https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/issues>
+- Jatorrizko aplikazioaren kode-gordailua: <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
+- YunoHost Denda: <https://apps.yunohost.org/app/neutrinet>
+- Eman errore baten berri: <https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/issues>
 
 ## Garatzaileentzako informazioa
 
-Bidali `pull request` a [ `unstable` abarrera](https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable).
+Bidali `pull request`a [`unstable` abarrera](https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable).
 
 `unstable` abarra probatzeko, ondorengoa egin:
 

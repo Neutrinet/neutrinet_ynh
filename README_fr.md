@@ -5,9 +5,7 @@ Il NE doit PAS être modifié à la main.
 
 # Neutrinet pour YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) 
-
-![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
+[![Niveau d’intégration](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
 
 [![Installer Neutrinet avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=neutrinet)
 
@@ -20,19 +18,19 @@ Il NE doit PAS être modifié à la main.
 
 The Neutrinet application is for Neutrinet members that have a Neutrinet VPN. It automatically checks and renews the VPN certificates. This package also contains a web page with contact information and other useful links.
 
-**Version incluse :** 0.4.1~ynh1
 
+**Version incluse :** 0.4.1~ynh1
 ## Documentations et ressources
 
-* Dépôt de code officiel de l’app : <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
-* YunoHost Store : <https://apps.yunohost.org/app/neutrinet>
-* Signaler un bug : <https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/issues>
+- Dépôt de code officiel de l’app : <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
+- YunoHost Store : <https://apps.yunohost.org/app/neutrinet>
+- Signaler un bug : <https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/issues>
 
 ## Informations pour les développeurs
 
-Merci de faire vos pull request sur la [branche `unstable` ](https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable).
+Merci de faire vos pull request sur la [branche `unstable`](https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable).
 
-Pour essayer la branche `unstable` , procédez comme suit :
+Pour essayer la branche `unstable`, procédez comme suit :
 
 ```bash
 sudo yunohost app install https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable --debug
