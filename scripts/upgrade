@@ -29,10 +29,14 @@ if [[ -n "${version:-}" ]]; then
     ynh_app_setting_delete --app="$app" --key=version
 fi
 
+if [[ -e "/etc/cron.daily/$app-renew-cert" ]]; then
+    ynh_secure_remove --file="/etc/cron.daily/$app-renew-cert"
+fi
+
 #=================================================
 # REINSTALL STATIC FILES
 #=================================================
-ynh_script_progression "Installing static site..."
+ynh_script_progression --message="Installing static site..."
 
 ynh_secure_remove --file="$install_dir/app"
 cp -r ../sources/. "$install_dir/app"
@@ -43,7 +47,7 @@ chown -R "$app:www-data" "$install_dir"
 #=================================================
 # REINSTALL RENEW CERT
 #=================================================
-ynh_script_progression "Installing VPN certificate renewal tool…"
+ynh_script_progression --message="Installing VPN certificate renewal tool…"
 
 ynh_setup_source --dest_dir="$renew_cert_path" --full_replace=1
 
@@ -61,18 +65,16 @@ ynh_script_progression --message="Upgrading system configurations related to $ap
 
 ynh_add_nginx_config
 
-ynh_add_config --template="renew-cert-cron.sh" --destination="/etc/cron.daily/$app-renew-cert"
-chown root:root "/etc/cron.daily/$app-renew-cert"
-chmod 0755 "/etc/cron.daily/$app-renew-cert"
+ynh_add_config --template="renew-cert-cron" --destination="/etc/cron.d/$app-renew-cert"
 
 #=================================================
 # FINALIZATION
 #=================================================
-ynh_script_progression "Checking certificates…"
+ynh_script_progression --message="Checking certificates…"
 
 # (This is expected to fail during CI tests because no credential available)
 if [[ "${PACKAGE_CHECK_EXEC:-0}" -eq 0 ]]; then
-    "/etc/cron.daily/$app-renew-cert"
+    ynh_exec_warn_less $data_dir/renew_cert/renew_cert.sh
 fi
 
 #=================================================

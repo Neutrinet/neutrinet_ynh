@@ -1,110 +1,39 @@
-#!/bin/bash
+#!/bin/bash -e
 
-set -e
+SCRIPT_DIR=$(dirname "$0")
 
-OPENVPN_CONF_DIR="/etc/openvpn"
-OPENVPN_KEYS_DIR="${OPENVPN_CONF_DIR}/keys"
-OPENVPN_CREDENTIALS_FILE="${OPENVPN_KEYS_DIR}/credentials"
-OPENVPN_AUTH_FILE="${OPENVPN_KEYS_DIR}/auth"
-OPENVPN_USER_CERT="${OPENVPN_KEYS_DIR}/user.crt"
-OPENVPN_USER_KEY="${OPENVPN_KEYS_DIR}/user.key"
-OPENVPN_SERVER_CERT="${OPENVPN_KEYS_DIR}/ca-server.crt"
-OPENVPN_CONF_TEMPLATE="${OPENVPN_CONF_DIR}/client.conf.tpl"
+OPENVPN_KEYS_DIR="/etc/openvpn/keys"
 
-OPENVPN_CLIENT_LOGS="/var/log/openvpn-client.log"
-
-NEUTRINET_CONF_TEMPLATE="neutrinet_openvpn_config"
-
-if [[ -z $RENEW_CERT_PATH ]]
-then
-  RENEW_CERT_PATH=$PWD
-fi
-
-if [[ -z $RENEW_CERT_PYTHON ]]
-then
-  RENEW_CERT_PYTHON=$(command -v python3)
-fi
-RENEW_CERT_SCRIPT="${RENEW_CERT_PATH}/renew.py"
-
-if [[ -f $OPENVPN_CREDENTIALS_FILE ]]
-then
-  credentials_file=$OPENVPN_CREDENTIALS_FILE
-elif [[ -f $OPENVPN_AUTH_FILE ]]
-then
-  credentials_file=$OPENVPN_AUTH_FILE
-else
-  >&2 echo "ERROR: Cannot find credentials for Neutrinet VPN since neither ${OPENVPN_CREDENTIALS_FILE} nor ${OPENVPN_AUTH_FILE} exists."
-  exit 1
-fi
-
-login=$(head -n 1 "$credentials_file")
-password=$(tail -n 1 "$credentials_file")
-
-run_date=$(date +'%Y-%m-%d_%H:%M:%S')
-renew_dir="certs_$run_date"
+renew_dir=$(mktemp -d /tmp/renew_cert.XXXXX)
 renew_params="$@"
+/usr/bin/env python3 $SCRIPT_DIR/renew.py -d "${renew_dir}" $renew_params
 
-$RENEW_CERT_PYTHON $RENEW_CERT_SCRIPT "$login" -p "$password" -c "$OPENVPN_USER_CERT" -d "$renew_dir" $renew_params
-
-if [[ ! -d $renew_dir || ! -f $renew_dir/ca.crt || ! -f $renew_dir/client.crt || ! -f $renew_dir/client.key ]]
-then
-  rm -rf "$renew_dir"
+if [[ ! -f "${renew_dir}/ca.crt" || ! -f "${renew_dir}/client.crt" || ! -f "${renew_dir}/client.key" ]]; then
+  rm -rf "${renew_dir}"
   exit 0
 fi
 
 echo "VPN certificate renewed!"
-echo "Saving old OpenVPN config"
-cp -r $OPENVPN_CONF_DIR{,.old_${run_date}}
-
-echo "Copying new OpenVPN config"
-cp "$NEUTRINET_CONF_TEMPLATE" "$OPENVPN_CONF_TEMPLATE"
+echo "Backuping OpenVPN config"
+yunohost backup create -n "vpnclient-renew-cert_$(date +'%Y%m%d_%H%M%S')" --apps vpnclient
 
 echo "Copying new certificates"
-cp "$renew_dir/ca.crt" "$OPENVPN_SERVER_CERT"
-cp "$renew_dir/client.crt" "$OPENVPN_USER_CERT"
-cp "$renew_dir/client.key" "$OPENVPN_USER_KEY"
+cp "${renew_dir}/ca.crt" "${OPENVPN_KEYS_DIR}/ca-server.crt"
+cp "${renew_dir}/client.crt" "${OPENVPN_KEYS_DIR}/user.crt"
+cp "${renew_dir}/client.key" "${OPENVPN_KEYS_DIR}/user.key"
 
-echo "Adding user credentials"
-echo -e "$login\n$password" > "$OPENVPN_CREDENTIALS_FILE"
-chmod 0600 "$OPENVPN_CREDENTIALS_FILE"
+echo "Setting permissions"
+chmod 0600 "${OPENVPN_KEYS_DIR}/user.key"
+chmod 0600 "${OPENVPN_KEYS_DIR}/credentials"
 
-echo "Updating VPNClient config"
-yunohost app setting vpnclient server_name -v "vpn.neutrinet.be"
-yunohost app setting vpnclient server_port -v "1195"
-yunohost app setting vpnclient server_proto -v "udp"
-yunohost app setting vpnclient service_enabled -v "1"
-yunohost app setting vpnclient login_user -v "$login"
-yunohost app setting vpnclient login_passphrase -v "$password"
+echo "Cleaning up files"
+rm -rf "$renew_dir"
 
-echo "Critical part 1: reloading VPNClient"
-if ! ynh-vpnclient restart && ynh-vpnclient status
-then
-  >&2 echo "ERROR: Failed to restart VPNClient"
-  tail -n 200 "$OPENVPN_CLIENT_LOGS"
+echo "Restarting VPN client to apply new certificate"
+yunohost service restart ynh-vpnclient
+
+if ! ynh-vpnclient status; then
+  >&2 echo "ERROR: Failed to restart VPN client"
+  tail -n 200 "/var/log/openvpn-client.log"
   exit 1
-fi
-
-echo "Critical part 2: restarting OpenVPN"
-if ! service openvpn restart
-then
-  >&2 echo "ERROR: Failed to restart OpenVPN"
-  journalctl -u openvpn -n 200 --no-pager
-  exit 1
-fi
-
-sleep 15
-
-if ! command -v ynh-hotspot > /dev/null
-then
-  exit 0
-fi
-
-echo "Few, we're done, let's wait 2min to be sure the VPN is running, then restart hotspot"
-sleep 120
-
-echo "Restarting hotspot"
-if ! ynh-hotspot restart && ynh-hotspot status
-then
-  >&2 echo "ERROR: Failed to restart hotspot"
-  echo "Since it's not a critical part, let's continue"
 fi
