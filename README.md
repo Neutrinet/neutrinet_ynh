@@ -5,7 +5,9 @@ It shall NOT be edited by hand.
 
 # Neutrinet for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) ![Working status](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
+[![Integration level](https://apps.yunohost.org/badge/integration/neutrinet)](https://ci-apps.yunohost.org/ci/apps/neutrinet/)
+![Working status](https://apps.yunohost.org/badge/state/neutrinet)
+![Maintenance status](https://apps.yunohost.org/badge/maintained/neutrinet)
 
 [![Install Neutrinet with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=neutrinet)
 
@@ -19,7 +21,7 @@ It shall NOT be edited by hand.
 The Neutrinet application is for Neutrinet members that have a Neutrinet VPN. It automatically checks and renews the VPN certificates. This package also contains a web page with contact information and other useful links.
 
 
-**Shipped version:** 0.4.1~ynh1
+**Shipped version:** 0.4.2~ynh1
 ## Documentation and resources
 
 - Upstream app code repository: <https://gitlab.domainepublic.net/Neutrinet/renew_cert>

@@ -5,7 +5,9 @@
 
 # YunoHost 上的 Neutrinet
 
-[![集成程度](https://dash.yunohost.org/integration/neutrinet.svg)](https://dash.yunohost.org/appci/app/neutrinet) ![工作状态](https://ci-apps.yunohost.org/ci/badges/neutrinet.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/neutrinet.maintain.svg)
+[![集成程度](https://apps.yunohost.org/badge/integration/neutrinet)](https://ci-apps.yunohost.org/ci/apps/neutrinet/)
+![工作状态](https://apps.yunohost.org/badge/state/neutrinet)
+![维护状态](https://apps.yunohost.org/badge/maintained/neutrinet)
 
 [![使用 YunoHost 安装 Neutrinet](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=neutrinet)
 
@@ -19,7 +21,7 @@
 The Neutrinet application is for Neutrinet members that have a Neutrinet VPN. It automatically checks and renews the VPN certificates. This package also contains a web page with contact information and other useful links.
 
 
-**分发版本：** 0.4.1~ynh1
+**分发版本：** 0.4.2~ynh1
 ## 文档与资源
 
 - 上游应用代码库： <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
