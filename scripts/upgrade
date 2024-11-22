@@ -37,7 +37,7 @@ for config_file in /etc/openvpn/client.{conf,cube,ovpn}; do
   if [[ -e "${config_file}" ]]; then
     sed -r -i 's/cipher [a-zA-Z0-9-]+/data-ciphers AES-256-GCM:AES-256-CBC:AES-128-GCM:CHACHA20-POLY1305/g' "${config_file}"
   fi
-fi
+done
 
 #=================================================
 # REINSTALL STATIC FILES
