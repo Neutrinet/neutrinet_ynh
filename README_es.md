@@ -6,7 +6,9 @@ No se debe editar a mano.
 # Neutrinet para Yunohost
 
 [![Nivel de integración](https://apps.yunohost.org/badge/integration/neutrinet)](https://ci-apps.yunohost.org/ci/apps/neutrinet/)
+
 ![Estado funcional](https://apps.yunohost.org/badge/state/neutrinet)
+
 ![Estado En Mantención](https://apps.yunohost.org/badge/maintained/neutrinet)
 
 [![Instalar Neutrinet con Yunhost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=neutrinet)
@@ -20,19 +22,19 @@ No se debe editar a mano.
 
 The Neutrinet application is for Neutrinet members that have a Neutrinet VPN. It automatically checks and renews the VPN certificates. This package also contains a web page with contact information and other useful links.
 
+**Versión actual:** 0.4.2~ynh2
 
-**Versión actual:** 0.4.2~ynh1
 ## Documentaciones y recursos
 
-- Repositorio del código fuente oficial de la aplicación : <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
-- Catálogo YunoHost: <https://apps.yunohost.org/app/neutrinet>
-- Reportar un error: <https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/issues>
+* Repositorio del código fuente oficial de la aplicación : <https://gitlab.domainepublic.net/Neutrinet/renew_cert>
+* Catálogo YunoHost: <https://apps.yunohost.org/app/neutrinet>
+* Reportar un error: <https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/issues>
 
 ## Información para desarrolladores
 
-Por favor enviar sus correcciones a la [rama `unstable`](https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable).
+Por favor enviar sus correcciones a la [rama `unstable` ](https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable).
 
-Para probar la rama `unstable`, sigue asÍ:
+Para probar la rama `unstable` , sigue asÍ:
 
 ```bash
 sudo yunohost app install https://gitlab.domainepublic.net/Neutrinet/neutrinet_ynh/tree/unstable --debug
